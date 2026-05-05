@@ -1,0 +1,255 @@
+{
+  "app_name": "Eco Huella - Calculadora Diaria",
+  "version": "2.0",
+  "metadata": {
+    "region": "San Juan, Argentina",
+    "unit": "kg CO₂e",
+    "date": "2026-04-13",
+    "calculation_method": "Análisis de Ciclo de Vida (ACV)"
+  },
+  "daily_tasks": [
+    {
+      "id": "breakfast",
+      "time": "07:00",
+      "name": "Desayuno",
+      "emoji": "🌾",
+      "description": "¿Qué vas a desayunar?",
+      "color_bg": "#EAF3DE",
+      "options": [
+        {
+          "id": "breakfast_fruit",
+          "label": "Frutas, frutos secos o palta",
+          "emissions": 0.2,
+          "impact": "low",
+          "icon": "🍎"
+        },
+        {
+          "id": "breakfast_dairy",
+          "label": "Lácteos: leche, queso o yogurt",
+          "emissions": 0.6,
+          "impact": "medium",
+          "icon": "🥛"
+        },
+        {
+          "id": "breakfast_egg",
+          "label": "Huevo",
+          "emissions": 0.4,
+          "impact": "medium",
+          "icon": "🥚"
+        },
+        {
+          "id": "breakfast_cookies",
+          "label": "Galletas dulces o saladas",
+          "emissions": 0.3,
+          "impact": "low",
+          "icon": "🍪"
+        },
+        {
+          "id": "breakfast_none",
+          "label": "Nada",
+          "emissions": 0.0,
+          "impact": "low",
+          "icon": "⏭️"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "time": "08:30",
+      "name": "Ir al trabajo",
+      "emoji": "🚗",
+      "description": "¿Cómo te trasladarás hoy?",
+      "color_bg": "#EAF3DE",
+      "options": [
+        {
+          "id": "transport_bike",
+          "label": "Bicicleta / Caminar",
+          "emissions": 0.0,
+          "impact": "low",
+          "icon": "🚲"
+        },
+        {
+          "id": "transport_scooter",
+          "label": "Scooter eléctrico",
+          "emissions": 0.2,
+          "impact": "low",
+          "icon": "🛴"
+        },
+        {
+          "id": "transport_bus",
+          "label": "Colectivo / Transporte público",
+          "emissions": 0.9,
+          "impact": "medium",
+          "icon": "🚌"
+        },
+        {
+          "id": "transport_moto",
+          "label": "Moto",
+          "emissions": 2.2,
+          "impact": "medium",
+          "icon": "🏍️"
+        },
+        {
+          "id": "transport_car",
+          "label": "Auto / Camioneta",
+          "emissions": 5.5,
+          "impact": "high",
+          "icon": "🚗"
+        }
+      ]
+    },
+    {
+      "id": "lunch",
+      "time": "12:00",
+      "name": "Almuerzo",
+      "emoji": "🍽️",
+      "description": "¿Qué vas a almorzar?",
+      "color_bg": "#FAEEDA",
+      "options": [
+        {
+          "id": "lunch_vegetables",
+          "label": "Verduras o legumbres",
+          "emissions": 0.5,
+          "impact": "low",
+          "icon": "🥗"
+        },
+        {
+          "id": "lunch_carbs",
+          "label": "Carbohidratos: pasta o arroz",
+          "emissions": 0.7,
+          "impact": "medium",
+          "icon": "🍚"
+        },
+        {
+          "id": "lunch_fish",
+          "label": "Pollo o pescado",
+          "emissions": 1.6,
+          "impact": "medium",
+          "icon": "🍗"
+        },
+        {
+          "id": "lunch_fastfood",
+          "label": "Comida rápida / Ultraprocesados",
+          "emissions": 2.0,
+          "impact": "high",
+          "icon": "🍔"
+        },
+        {
+          "id": "lunch_beef",
+          "label": "Carne vacuna",
+          "emissions": 4.5,
+          "impact": "high",
+          "icon": "🥩"
+        }
+      ]
+    },
+    {
+      "id": "exercise",
+      "time": "18:00",
+      "name": "Entrenar / Hobby",
+      "emoji": "🏋️",
+      "description": "¿Qué hobby practicarás?",
+      "color_bg": "var(--color-background-secondary)",
+      "options": [
+        {
+          "id": "hobby_sport",
+          "label": "Deporte / Aire libre",
+          "emissions": 0.1,
+          "impact": "low",
+          "icon": "⛹️"
+        },
+        {
+          "id": "hobby_art",
+          "label": "Arte / Manualidades",
+          "emissions": 0.2,
+          "impact": "low",
+          "icon": "🎨"
+        },
+        {
+          "id": "hobby_tech",
+          "label": "Tecnología / Gaming",
+          "emissions": 0.8,
+          "impact": "medium",
+          "icon": "🎮"
+        },
+        {
+          "id": "hobby_vehicles",
+          "label": "Vehículos / Motorsports",
+          "emissions": 2.5,
+          "impact": "high",
+          "icon": "🏎️"
+        },
+        {
+          "id": "hobby_rest",
+          "label": "Descanso / Lectura",
+          "emissions": 0.0,
+          "impact": "low",
+          "icon": "📖"
+        }
+      ]
+    },
+    {
+      "id": "dinner",
+      "time": "21:00",
+      "name": "Cena",
+      "emoji": "🌙",
+      "description": "¿Qué vas a cenar?",
+      "color_bg": "#FAEEDA",
+      "options": [
+        {
+          "id": "dinner_vegetables",
+          "label": "Verduras o legumbres",
+          "emissions": 0.5,
+          "impact": "low",
+          "icon": "🥬"
+        },
+        {
+          "id": "dinner_carbs",
+          "label": "Carbohidratos: sopa o caldo",
+          "emissions": 0.7,
+          "impact": "medium",
+          "icon": "🍲"
+        },
+        {
+          "id": "dinner_fish",
+          "label": "Pollo o pescado",
+          "emissions": 1.6,
+          "impact": "medium",
+          "icon": "🐟"
+        },
+        {
+          "id": "dinner_fastfood",
+          "label": "Ultraprocesados / Pizza",
+          "emissions": 2.0,
+          "impact": "high",
+          "icon": "🍕"
+        },
+        {
+          "id": "dinner_beef",
+          "label": "Carne vacuna",
+          "emissions": 4.5,
+          "impact": "high",
+          "icon": "🍖"
+        }
+      ]
+    }
+  ],
+  "impact_thresholds": {
+    "light": { "max": 5, "label": "Huella ligera", "description": "Buen impacto ambiental" },
+    "moderate": { "min": 6, "max": 15, "label": "Huella moderada", "description": "Impacto promedio" },
+    "heavy": { "min": 16, "label": "Huella pesada", "description": "Alto impacto ambiental" }
+  },
+  "colors": {
+    "primary": "#0F2B1E",
+    "accent": "#1D9E75",
+    "light_accent": "#5DCAA5",
+    "light_bg": "#E1F5EE",
+    "light_text": "#9FE1CB",
+    "low": "#639922",
+    "low_bg": "#EAF3DE",
+    "medium": "#BA7517",
+    "medium_bg": "#FAEEDA",
+    "high": "#E24B4A",
+    "high_bg": "#FCEBEB"
+  }
+}

@@ -1,42 +1,75 @@
-import { useState } from 'react';
-import Layout from './components/layout/Layout';
-import LandingPage from './components/features/LandingPage';
-import QuizController from './components/features/QuizController';
-import ResultsDashboard from './components/features/ResultsDashboard';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Pages
+import LoginPage from "./components/auth/LoginPage";
+import SignupPage from "./components/auth/SignupPage";
+import LandingPage from "./components/features/LandingPage";
+import QuizController from "./components/features/QuizController";
+import ResultsDashboard from "./components/features/ResultsDashboard";
+import AdminPanel from "./components/admin/AdminPanel";
+import Layout from "./components/layout/Layout";
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('landing'); 
-  const [finalData, setFinalData] = useState(null);
-
-  const handleQuizFinish = (answers) => {
-    console.log("Respuestas finales:", answers);
-    setFinalData(answers);
-    setCurrentScreen('dashboard');
-  };
-
   return (
-    <>
-      {currentScreen === 'landing' && (
-        <Layout>
-          <LandingPage onStart={() => setCurrentScreen('quiz')} />
-        </Layout>
-      )}
-      
-      {currentScreen === 'quiz' && (
-        <QuizController 
-          onFinish={handleQuizFinish} 
-          onCancel={() => setCurrentScreen('landing')}
-        />
-      )}
+    <Router>
+      <AuthProvider>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
 
-      {currentScreen === 'dashboard' && (
-        <Layout>
-          <ResultsDashboard 
-            answers={finalData} 
-            onRestart={() => setCurrentScreen('landing')} 
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <LandingPage />
+                </Layout>
+              </ProtectedRoute>
+            }
           />
-        </Layout>
-      )}
-    </>
+
+          <Route
+            path="/quiz"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <QuizController />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ResultsDashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <Layout>
+                  <AdminPanel />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
