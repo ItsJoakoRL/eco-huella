@@ -1,37 +1,75 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import Button from "./ui/Button";
-import Card from "./ui/Card";
+import { useAuth } from "../../context/AuthContext";
+import Button from "../ui/Button";
+
+const inputClasses = "signup-input";
+
+const fieldLabels = {
+  name: "Nombre completo",
+  email: "Correo electronico",
+  age: "Edad",
+  city: "Ciudad",
+  province: "Provincia",
+  country: "Pais",
+  occupation: "Ocupacion",
+  householdSize: "Personas en el hogar",
+  sustainabilityGoal: "Objetivo ambiental",
+  password: "Contrasena",
+  confirmPassword: "Confirmar contrasena",
+};
 
 const SignupPage = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    age: "",
+    city: "",
+    province: "",
+    country: "Argentina",
+    occupation: "",
+    householdSize: "1",
+    sustainabilityGoal: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
 
+  const handleChange = (field, value) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+    if (formData.password !== formData.confirmPassword) {
+      setError("Las contrasenas no coinciden");
       return;
     }
 
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+    if (formData.password.length < 6) {
+      setError("La contrasena debe tener al menos 6 caracteres");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      await signup(name, email, password);
+      await signup(formData.name, formData.email, formData.password, {
+        age: formData.age ? Number(formData.age) : undefined,
+        city: formData.city,
+        province: formData.province,
+        country: formData.country,
+        occupation: formData.occupation,
+        householdSize: formData.householdSize
+          ? Number(formData.householdSize)
+          : undefined,
+        sustainabilityGoal: formData.sustainabilityGoal,
+      });
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Error al registrarse");
@@ -41,94 +79,176 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-on-surface mb-2">Eco-Huella</h1>
-          <p className="text-on-surface-variant">Crea tu cuenta</p>
-        </div>
+    <div className="signup-page eco-aurora">
+      <header className="signup-brand-wrap">
+        <Link to="/login" className="signup-brand animate-pop">
+          EH
+        </Link>
+      </header>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+      <main className="signup-shell">
+        <section className="signup-card animate-rise">
+          <aside className="signup-aside">
+            <div className="signup-aside-glow" />
+            <div className="signup-aside-content">
+              <div>
+                <span className="signup-eyebrow">Perfil sustentable</span>
+                <h1>Datos que hacen mas preciso tu impacto.</h1>
+                <p>
+                  Cuanto mejor entendemos tu contexto, mejores son las
+                  recomendaciones para reducir tu huella.
+                </p>
+              </div>
+
+              <div className="signup-feature-list">
+                {[
+                  ["location_on", "Ubicacion", "Factores locales y habitos"],
+                  ["home", "Hogar", "Personas que comparten consumos"],
+                  ["flag", "Objetivo", "Acciones alineadas a tu meta"],
+                ].map(([icon, title, text]) => (
+                  <div key={title} className="signup-feature hover-lift">
+                    <span className="material-symbols-outlined">{icon}</span>
+                    <div>
+                      <strong>{title}</strong>
+                      <small>{text}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <div className="signup-content">
+            <div className="signup-header">
+              <div>
+                <span>Crear cuenta</span>
+                <h2>Registrarse</h2>
+              </div>
+              <Link to="/login" className="signup-login-link">
+                Ya tienes una cuenta?
+              </Link>
+            </div>
+
+            {error && <div className="signup-error">{error}</div>}
+
+            <form onSubmit={handleSubmit} className="signup-form">
+              <div className="signup-grid">
+                {["name", "email", "age", "city", "province", "country"].map(
+                  (field) => (
+                    <label key={field} className="signup-field">
+                      {fieldLabels[field]}
+                      <input
+                        type={
+                          field === "email"
+                            ? "email"
+                            : field === "age"
+                              ? "number"
+                              : "text"
+                        }
+                        min={field === "age" ? "13" : undefined}
+                        max={field === "age" ? "120" : undefined}
+                        value={formData[field]}
+                        onChange={(e) => handleChange(field, e.target.value)}
+                        className={inputClasses}
+                        placeholder="Completar campo"
+                        required={["name", "email", "city", "province"].includes(
+                          field
+                        )}
+                      />
+                    </label>
+                  )
+                )}
+              </div>
+
+              <div className="signup-context">
+                <div className="signup-context-head">
+                  <span className="material-symbols-outlined">
+                    person_pin_circle
+                  </span>
+                  <div>
+                    <h3>Contexto personal</h3>
+                    <p>Estos datos ayudan a personalizar el diagnostico.</p>
+                  </div>
+                </div>
+
+                <div className="signup-grid">
+                  <label className="signup-field">
+                    {fieldLabels.occupation}
+                    <input
+                      type="text"
+                      value={formData.occupation}
+                      onChange={(e) => handleChange("occupation", e.target.value)}
+                      className={inputClasses}
+                      placeholder="Estudiante, docente, profesional..."
+                    />
+                  </label>
+
+                  <label className="signup-field">
+                    {fieldLabels.householdSize}
+                    <input
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={formData.householdSize}
+                      onChange={(e) =>
+                        handleChange("householdSize", e.target.value)
+                      }
+                      className={inputClasses}
+                      placeholder="1"
+                    />
+                  </label>
+
+                  <label className="signup-field signup-field-wide">
+                    {fieldLabels.sustainabilityGoal}
+                    <select
+                      value={formData.sustainabilityGoal}
+                      onChange={(e) =>
+                        handleChange("sustainabilityGoal", e.target.value)
+                      }
+                      className={inputClasses}
+                    >
+                      <option value="">Elegir objetivo</option>
+                      <option value="reduce_energy">
+                        Reducir consumo de energia
+                      </option>
+                      <option value="move_better">
+                        Moverme de forma mas sustentable
+                      </option>
+                      <option value="eat_better">Mejorar mi alimentacion</option>
+                      <option value="waste_less">Generar menos residuos</option>
+                      <option value="learn">Aprender y medir mi impacto</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div className="signup-grid">
+                {["password", "confirmPassword"].map((field) => (
+                  <label key={field} className="signup-field">
+                    {fieldLabels[field]}
+                    <input
+                      type="password"
+                      value={formData[field]}
+                      onChange={(e) => handleChange(field, e.target.value)}
+                      className={inputClasses}
+                      placeholder="Minimo 6 caracteres"
+                      required
+                    />
+                  </label>
+                ))}
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="signup-submit eco-glow-button"
+              >
+                {isLoading ? "Registrando..." : "Crear una cuenta"}
+              </Button>
+            </form>
           </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-on-surface mb-1">
-              Nombre Completo
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Tu nombre"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-on-surface mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="tu@email.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-on-surface mb-1">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-on-surface mb-1">
-              Confirmar Contraseña
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-outline rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Registrando..." : "Crear Cuenta"}
-          </Button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-on-surface-variant">
-            ¿Ya tienes cuenta?{" "}
-            <Link to="/login" className="text-primary font-semibold hover:underline">
-              Inicia sesión
-            </Link>
-          </p>
-        </div>
-      </Card>
+        </section>
+      </main>
     </div>
   );
 };

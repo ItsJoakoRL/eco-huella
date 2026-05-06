@@ -2,46 +2,75 @@ import React, { useState } from "react";
 import QuestionManagement from "./QuestionManagement";
 import UserManagement from "./UserManagement";
 import ParameterManagement from "./ParameterManagement";
-import Button from "../ui/Button";
-import Card from "../ui/Card";
+
+const tabs = [
+  {
+    id: "users",
+    label: "Usuarios",
+    icon: "group",
+    description: "Roles, permisos y cuentas activas",
+  },
+  {
+    id: "questions",
+    label: "Preguntas",
+    icon: "quiz",
+    description: "Cuestionario y orden del diagnostico",
+  },
+  {
+    id: "parameters",
+    label: "Parametros",
+    icon: "tune",
+    description: "Factores de emision por categoria",
+  },
+];
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("users");
-
-  const tabs = [
-    { id: "users", label: "Usuarios" },
-    { id: "questions", label: "Preguntas" },
-    { id: "parameters", label: "Parámetros" },
-  ];
+  const activeTabInfo = tabs.find((tab) => tab.id === activeTab);
 
   return (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-on-surface mb-4">Panel de Administración</h1>
-        
-        <div className="flex gap-2 border-b border-outline">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+    <main className="admin-page">
+      <section className="admin-hero animate-rise">
+        <div>
+          <span className="admin-eyebrow">Centro de control</span>
+          <h1>Panel de Administracion</h1>
+          <p>
+            Ajusta usuarios, preguntas y parametros desde una vista mas clara,
+            rapida y preparada para trabajar sin perder contexto.
+          </p>
         </div>
-      </div>
 
-      <div>
+        <div className="admin-hero-card hover-lift">
+          <span className="material-symbols-outlined animate-pulse-soft">
+            verified
+          </span>
+          <div>
+            <strong>EcoHuella Admin</strong>
+            <small>{activeTabInfo.description}</small>
+          </div>
+        </div>
+      </section>
+
+      <nav className="admin-tabs animate-pop" aria-label="Secciones de administracion">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`admin-tab ${activeTab === tab.id ? "active" : ""}`}
+          >
+            <span className="material-symbols-outlined">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      <section className="admin-panel-body animate-rise">
         {activeTab === "users" && <UserManagement />}
         {activeTab === "questions" && <QuestionManagement />}
         {activeTab === "parameters" && <ParameterManagement />}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

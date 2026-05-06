@@ -1,52 +1,60 @@
-import { useMemo } from 'react';
-import quizData from '../../data/questions.json';
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import quizData from "../../data/questions.json";
 
 export default function ResultsDashboard({ answers, onRestart }) {
-  
-  // MOTOR DE CÁLCULO MÁGICO
+  const navigate = useNavigate();
+  const answersData = useMemo(() => {
+    if (answers) return answers;
+
+    try {
+      return JSON.parse(localStorage.getItem("quizAnswers") || "{}");
+    } catch {
+      return {};
+    }
+  }, [answers]);
+
   const results = useMemo(() => {
     const getOption = (moduleId, questionId) => {
-      const q = quizData.modules.find(m => m.id === moduleId)?.questions.find(q => q.id === questionId);
-      if (!q || !answers[questionId]) return null;
-      return q.options?.find(opt => opt.label === answers[questionId]) || null;
+      const q = quizData.modules.find((m) => m.id === moduleId)?.questions.find((item) => item.id === questionId);
+      if (!q || !answersData[questionId]) return null;
+      return q.options?.find((opt) => opt.label === answersData[questionId]) || null;
     };
 
-    const getNumber = (questionId, defaultVal = 1) => Number(answers[questionId]) || defaultVal;
+    const getNumber = (questionId, defaultVal = 1) => Number(answersData[questionId]) || defaultVal;
 
-    const personas = getNumber('h_personas', 1);
-    const elecOpt = getOption('hogar', 'h_electricidad');
-    const calOpt = getOption('hogar', 'h_calefaccion');
-    const renOpt = getOption('hogar', 'h_renovable');
-    
-    let hogarKg = (((elecOpt?.value || 300) * 12 * (elecOpt?.factor || 0.35)) + 
-                  (50 * 12 * (calOpt?.factor || 2.02))) / personas; 
+    const personas = getNumber("h_personas", 1);
+    const elecOpt = getOption("hogar", "h_electricidad");
+    const calOpt = getOption("hogar", "h_calefaccion");
+    const renOpt = getOption("hogar", "h_renovable");
+
+    let hogarKg = (((elecOpt?.value || 300) * 12 * (elecOpt?.factor || 0.35)) + (50 * 12 * (calOpt?.factor || 2.02))) / personas;
     hogarKg = hogarKg * (renOpt?.impact_modifier || 1.0);
 
-    const transOpt = getOption('transporte', 't_medio_principal');
-    const kmSemana = getNumber('t_distancia_semanal', 50);
-    const vuelosOpt = getOption('transporte', 't_vuelos');
-    const ocupacionOpt = getOption('transporte', 't_ocupacion');
+    const transOpt = getOption("transporte", "t_medio_principal");
+    const kmSemana = getNumber("t_distancia_semanal", 50);
+    const vuelosOpt = getOption("transporte", "t_vuelos");
+    const ocupacionOpt = getOption("transporte", "t_ocupacion");
 
-    let transporteKg = ((kmSemana * 52) * (transOpt?.factor || 0)) / (ocupacionOpt?.divisor || 1);
+    let transporteKg = (kmSemana * 52 * (transOpt?.factor || 0)) / (ocupacionOpt?.divisor || 1);
     transporteKg += (vuelosOpt?.value || 0) * (vuelosOpt?.factor || 0);
 
-    const dietaOpt = getOption('alimentacion', 'a_dieta');
-    const procOpt = getOption('alimentacion', 'a_procedencia');
-    const despOpt = getOption('alimentacion', 'a_desperdicio');
+    const dietaOpt = getOption("alimentacion", "a_dieta");
+    const procOpt = getOption("alimentacion", "a_procedencia");
+    const despOpt = getOption("alimentacion", "a_desperdicio");
 
     let comidaKg = (dietaOpt?.base_yearly_kg || 1500) + ((despOpt?.extra_kg_co2 || 0) * 52);
     comidaKg = comidaKg * (procOpt?.impact_modifier || 1.0);
 
-    const recicOpt = getOption('residuos', 'r_reciclaje');
-    const compOpt = getOption('residuos', 'r_compras');
-    const repOpt = getOption('residuos', 'r_reparacion');
+    const recicOpt = getOption("residuos", "r_reciclaje");
+    const compOpt = getOption("residuos", "r_compras");
+    const repOpt = getOption("residuos", "r_reparacion");
 
-    let residuosKg = (300 + (compOpt?.extra_kg_co2 || 100));
+    let residuosKg = 300 + (compOpt?.extra_kg_co2 || 100);
     residuosKg = residuosKg * (recicOpt?.impact_modifier || 1.0) * (repOpt?.impact_modifier || 1.0);
 
     const totalKg = hogarKg + transporteKg + comidaKg + residuosKg;
     const totalTon = (totalKg / 1000).toFixed(1);
-    
     const diffAvg = (((totalTon - 4.7) / 4.7) * 100).toFixed(0);
     const planetas = (totalTon / 1.5).toFixed(1);
 
@@ -57,189 +65,178 @@ export default function ResultsDashboard({ answers, onRestart }) {
       residuos: (residuosKg / 1000).toFixed(1),
       total: totalTon,
       diffAvg: Number(diffAvg),
-      planetas: Number(planetas)
+      planetas: Number(planetas),
     };
-  }, [answers]);
+  }, [answersData]);
 
   const getPercent = (value) => `${((Number(value) / Number(results.total)) * 100).toFixed(1)}%`;
 
-  // LÓGICA DE RECOMENDACIONES DINÁMICAS
   const highestCategory = useMemo(() => {
     const categories = [
-      { id: 'hogar', value: Number(results.hogar), color: 'tertiary', title: 'Hogar' },
-      { id: 'transporte', value: Number(results.transporte), color: 'primary', title: 'Transporte' },
-      { id: 'comida', value: Number(results.comida), color: 'secondary', title: 'Alimentación' },
-      { id: 'residuos', value: Number(results.residuos), color: 'outline-variant', title: 'Residuos' }
+      { id: "hogar", value: Number(results.hogar), title: "Hogar" },
+      { id: "transporte", value: Number(results.transporte), title: "Transporte" },
+      { id: "comida", value: Number(results.comida), title: "Alimentacion" },
+      { id: "residuos", value: Number(results.residuos), title: "Residuos" },
     ];
-    return categories.reduce((max, cat) => cat.value > max.value ? cat : max, categories[0]);
+    return categories.reduce((max, cat) => (cat.value > max.value ? cat : max), categories[0]);
   }, [results]);
 
   const recomendaciones = {
     hogar: [
-      { titulo: 'Cambia a energía renovable', desc: 'Instalar paneles solares o cambiar de proveedor puede reducir tu huella hogareña hasta un 40%.', icon: 'bolt', ahorro: '-0.6 tCO2 / año' },
-      { titulo: 'Ajusta la climatización', desc: 'Bajar 1°C la calefacción o subirlo en el aire acondicionado ahorra hasta un 10% de energía.', icon: 'thermostat', ahorro: '-0.2 tCO2 / año' }
+      { titulo: "Cambia a energia renovable", desc: "Instalar paneles solares o cambiar de proveedor puede reducir tu huella hogarena hasta un 40%.", icon: "bolt", ahorro: "-0.6 tCO2 / ano" },
+      { titulo: "Ajusta la climatizacion", desc: "Bajar 1°C la calefaccion o subirlo en el aire acondicionado ahorra hasta un 10% de energia.", icon: "thermostat", ahorro: "-0.2 tCO2 / ano" },
     ],
     transporte: [
-      { titulo: 'Día sin coche semanal', desc: 'Dejar el coche solo un día a la semana marca una diferencia masiva en tu impacto anual de movilidad.', icon: 'directions_bike', ahorro: '-0.3 tCO2 / año' },
-      { titulo: 'Carpooling o Transporte Público', desc: 'Compartir tus viajes de ida y vuelta al trabajo reduce drásticamente las emisiones por pasajero.', icon: 'directions_bus', ahorro: '-0.8 tCO2 / año' }
+      { titulo: "Dia sin coche semanal", desc: "Dejar el coche solo un dia a la semana marca una diferencia masiva en tu impacto anual de movilidad.", icon: "directions_bike", ahorro: "-0.3 tCO2 / ano" },
+      { titulo: "Carpooling o transporte publico", desc: "Compartir tus viajes de ida y vuelta al trabajo reduce drasticamente las emisiones por pasajero.", icon: "directions_bus", ahorro: "-0.8 tCO2 / ano" },
     ],
     comida: [
-      { titulo: 'Lunes Sin Carne', desc: 'Reemplazar la carne vacuna un día a la semana reduce significativamente las emisiones de metano.', icon: 'eco', ahorro: '-0.4 tCO2 / año' },
-      { titulo: 'Compra de Productores Locales', desc: 'Consumir en ferias locales evita la huella de carbono del transporte internacional de alimentos.', icon: 'local_shipping', ahorro: '-0.1 tCO2 / año' }
+      { titulo: "Lunes sin carne", desc: "Reemplazar la carne vacuna un dia a la semana reduce significativamente las emisiones de metano.", icon: "eco", ahorro: "-0.4 tCO2 / ano" },
+      { titulo: "Compra de productores locales", desc: "Consumir en ferias locales evita la huella de carbono del transporte internacional de alimentos.", icon: "local_shipping", ahorro: "-0.1 tCO2 / ano" },
     ],
     residuos: [
-      { titulo: 'Compostaje casero', desc: 'El 50% de la basura es orgánica. Compostar evita que genere metano en los vertederos.', icon: 'recycling', ahorro: '-0.2 tCO2 / año' },
-      { titulo: 'Moda Circular', desc: 'Comprar ropa de segunda mano o extender la vida útil de tus prendas reduce la huella hídrica y de carbono.', icon: 'checkroom', ahorro: '-0.15 tCO2 / año' }
-    ]
+      { titulo: "Compostaje casero", desc: "El 50% de la basura es organica. Compostar evita que genere metano en los vertederos.", icon: "recycling", ahorro: "-0.2 tCO2 / ano" },
+      { titulo: "Moda circular", desc: "Comprar ropa de segunda mano o extender la vida util de tus prendas reduce la huella hidrica y de carbono.", icon: "checkroom", ahorro: "-0.15 tCO2 / ano" },
+    ],
   };
 
   const currentTips = recomendaciones[highestCategory.id];
+  const categoryTextClasses = {
+    hogar: "text-tertiary",
+    transporte: "text-primary",
+    comida: "text-secondary",
+    residuos: "text-on-surface-variant",
+  };
+  const highestTextClass = categoryTextClasses[highestCategory.id] || "text-primary";
+
+  const categories = [
+    { id: "hogar", icon: "home", label: "Hogar", color: "#feb300", val: results.hogar },
+    { id: "transporte", icon: "commute", label: "Transporte", color: "#296654", val: results.transporte },
+    { id: "comida", icon: "restaurant", label: "Alimentacion", color: "#b9dda0", val: results.comida },
+    { id: "residuos", icon: "delete_sweep", label: "Residuos", color: "#deddd8", val: results.residuos },
+  ];
+
+  const handleRestart = () => {
+    if (onRestart) {
+      onRestart();
+      return;
+    }
+
+    navigate("/quiz");
+  };
 
   return (
-    // Reducimos paddings perimetrales en móvil (px-4) y el espacio entre secciones (space-y-8)
-    <main className="max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-12 space-y-8 md:space-y-12 pb-24 md:pb-32">
-      
-      {/* HEADER SECTION */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-end">
-        <div className="lg:col-span-7 space-y-3 md:space-y-4">
-          <span className="inline-block bg-primary-container text-on-primary-container px-3 md:px-4 py-1 rounded-full font-label font-bold text-[10px] md:text-xs tracking-widest uppercase">
-            Tu Impacto Actual
-          </span>
-          {/* Tipografía fluida para el título principal */}
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-headline font-extrabold tracking-tighter leading-[1.1] md:leading-[0.9] text-primary">
-            Tus pasos dejan <br className="hidden sm:block"/><span className="text-tertiary">una huella.</span>
+    <div className="eco-aurora dashboard-page">
+      <section className="dashboard-hero">
+        <div className="animate-rise">
+          <span className="dashboard-eyebrow">Tu Impacto Actual</span>
+          <h1 className="dashboard-title">
+            Tus pasos dejan <span>una huella.</span>
           </h1>
-          <p className="text-on-surface-variant font-body text-base md:text-lg max-w-md leading-relaxed pt-2 md:pt-4">
-            Has completado tu evaluación de sostenibilidad. Aquí tienes los datos reales de tu consumo anual.
+          <p className="dashboard-lead">
+            Has completado tu evaluacion de sostenibilidad. Aqui tienes una lectura clara de tu consumo anual y donde conviene actuar primero.
           </p>
         </div>
-        
-        <div className="lg:col-span-5">
-          {/* Tarjeta principal más compacta en móvil */}
-          <div className="bg-surface-container-lowest rounded-[24px] md:rounded-[32px] p-6 md:p-8 editorial-shadow relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 md:p-6 opacity-10 scale-150 rotate-12 transition-transform group-hover:scale-175 pointer-events-none">
-              <span className="material-symbols-outlined text-8xl md:text-9xl">eco</span>
+
+        <div className="impact-card hover-lift animate-pop" style={{ animationDelay: "140ms" }}>
+          <p className="impact-label">Huella de carbono total</p>
+          <div className="impact-value">
+            <strong>{results.total}</strong>
+            <span>t CO2e</span>
+          </div>
+          <div className="impact-diff">
+            <div className="impact-diff-icon">
+              <span className="material-symbols-outlined">{results.diffAvg <= 0 ? "trending_down" : "trending_up"}</span>
             </div>
-            <div className="relative z-10">
-              <p className="text-xs md:text-sm font-label font-bold text-on-surface-variant uppercase tracking-widest mb-1 md:mb-2">Huella de Carbono Total</p>
-              <div className="flex items-baseline gap-2 md:gap-3">
-                {/* El número de toneladas ahora escala correctamente */}
-                <span className="text-5xl md:text-7xl font-headline font-black text-primary tracking-tighter">{results.total}</span>
-                <span className="text-xl md:text-2xl font-headline font-bold text-on-surface-variant">t CO2e</span>
-              </div>
-              <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-surface-container flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4">
-                <div className={`h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-full flex items-center justify-center ${results.diffAvg <= 0 ? 'bg-secondary-container text-on-secondary-container' : 'bg-red-100 text-red-800'}`}>
-                  <span className="material-symbols-outlined text-xl md:text-24px">
-                    {results.diffAvg <= 0 ? 'trending_down' : 'trending_up'}
-                  </span>
-                </div>
-                <p className="text-sm font-medium font-body text-on-surface-variant leading-tight">
-                  Estás un <span className={`font-bold ${results.diffAvg <= 0 ? 'text-secondary' : 'text-red-700'}`}>
-                    {Math.abs(results.diffAvg)}% {results.diffAvg <= 0 ? 'por debajo' : 'por encima'}
-                  </span> de la media nacional.
-                </p>
-              </div>
+            <div>
+              Estas un{" "}
+              <strong className={results.diffAvg <= 0 ? "text-secondary" : "text-red-700"}>
+                {Math.abs(results.diffAvg)}% {results.diffAvg <= 0 ? "por debajo" : "por encima"}
+              </strong>{" "}
+              de la media nacional.
             </div>
           </div>
         </div>
       </section>
 
-      {/* CHARTS SECTION */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        <div className="bg-surface-container-low rounded-[24px] md:rounded-[32px] p-6 md:p-10 lg:col-span-2">
-          <div className="flex justify-between items-start mb-8 md:mb-12">
+      <section className="dashboard-grid">
+        <div className="analysis-card hover-lift animate-rise">
+          <div className="dashboard-card-head">
             <div>
-              <h2 className="text-2xl md:text-3xl font-headline font-bold tracking-tight text-on-surface">Desglose por Categoría</h2>
-              <p className="font-body text-sm md:text-base text-on-surface-variant mt-1">¿Dónde se genera tu huella?</p>
+              <h2>Desglose por Categoria</h2>
+              <p>Visualiza que parte de tu vida genera mas impacto.</p>
             </div>
-            <div className="h-10 w-10 bg-surface-container-highest rounded-full hidden sm:flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-surface">bar_chart</span>
+            <div className="dashboard-head-icon">
+              <span className="material-symbols-outlined">bar_chart</span>
             </div>
           </div>
-          
-          <div className="space-y-6 md:space-y-10">
-            {/* Categorías (Barras más finas en móvil para no saturar) */}
-            {[
-              { id: 'hogar', icon: 'home', label: 'Hogar', color: 'bg-tertiary-container', val: results.hogar },
-              { id: 'transporte', icon: 'commute', label: 'Transporte', color: 'bg-primary', val: results.transporte },
-              { id: 'comida', icon: 'restaurant', label: 'Alimentación', color: 'bg-secondary-fixed-dim', val: results.comida },
-              { id: 'residuos', icon: 'delete_sweep', label: 'Residuos', color: 'bg-surface-container-highest', val: results.residuos }
-            ].map((cat) => (
-              <div key={cat.id} className="space-y-2 md:space-y-3">
-                <div className="flex justify-between items-end">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <span className="material-symbols-outlined text-on-surface-variant text-xl md:text-24px">{cat.icon}</span>
-                    <span className="font-bold font-body text-sm md:text-base text-on-surface">{cat.label}</span>
+
+          <div className="category-list">
+            {categories.map((cat) => (
+              <div key={cat.id} className="category-row">
+                <div className="category-meta">
+                  <div className="category-name">
+                    <span className="material-symbols-outlined">{cat.icon}</span>
+                    <span>{cat.label}</span>
                   </div>
-                  <span className="font-label font-bold text-xs md:text-sm text-on-surface-variant">{cat.val} tCO2</span>
+                  <span className="category-value">{cat.val} tCO2</span>
                 </div>
-                <div className="h-4 md:h-6 w-full bg-surface-container rounded-full overflow-hidden">
-                  <div className={`h-full ${cat.color} rounded-full`} style={{ width: getPercent(cat.val) }}></div>
+                <div className="category-track">
+                  <div className="category-fill" style={{ width: getPercent(cat.val), backgroundColor: cat.color }} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* PLANETAS TIERRA */}
-        <div className="bg-primary text-on-primary rounded-[24px] md:rounded-[32px] p-6 md:p-10 flex flex-col justify-between relative overflow-hidden editorial-shadow">
-          <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary-container/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="relative z-10">
-            <h2 className="text-2xl md:text-3xl font-headline font-bold tracking-tight mb-2 md:mb-4 leading-tight">¿Cuántos planetas Tierra necesitas?</h2>
-            <p className="font-body opacity-80 text-xs md:text-sm mb-6 md:mb-8">Si todos vivieran como tú, este sería el espacio que requeriríamos.</p>
-            
-            <div className="flex flex-wrap gap-2 md:gap-4 items-center justify-center py-4 md:py-8">
-              {Array.from({ length: Math.floor(results.planetas) }).map((_, i) => (
-                <span key={i} className="material-symbols-outlined text-5xl md:text-6xl text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
-              ))}
-              
-              {(results.planetas % 1) > 0.1 && (
-                <div className="relative overflow-hidden w-6 md:w-8">
-                  <span className="material-symbols-outlined text-5xl md:text-6xl text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>public</span>
-                  <div className="absolute top-0 right-0 h-full bg-primary" style={{ width: `${100 - ((results.planetas % 1) * 100)}%` }}></div>
-                </div>
-              )}
-            </div>
-            
-            <div className="text-center mt-2 md:mt-4">
-              <span className="text-5xl md:text-6xl font-headline font-black tracking-tighter">{results.planetas}</span>
-              <p className="font-label font-bold uppercase tracking-widest text-[10px] md:text-xs opacity-70 mt-1">Planetas Tierra</p>
-            </div>
+        <div className="planet-card hover-lift animate-pop" style={{ animationDelay: "160ms" }}>
+          <div>
+            <h2>Cuantos planetas Tierra necesitas?</h2>
+            <p>Si todos vivieran como tu, este seria el espacio que requeririamos.</p>
           </div>
-          <div className="relative z-10 mt-6 md:mt-8">
-            <button 
-              onClick={onRestart}
-              className="w-full bg-tertiary-container text-on-tertiary-fixed py-3 md:py-4 rounded-full font-headline font-bold text-sm md:text-base flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform shadow-lg"
-            >
-              <span>Volver a evaluar</span>
-              <span className="material-symbols-outlined">refresh</span>
-            </button>
+
+          <div className="planet-icons">
+            {Array.from({ length: Math.floor(results.planetas) }).map((_, i) => (
+              <span key={i} className="material-symbols-outlined animate-float-slow" style={{ fontVariationSettings: "'FILL' 1", animationDelay: `${i * 160}ms` }}>
+                public
+              </span>
+            ))}
+            {results.planetas % 1 > 0.1 && (
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                public
+              </span>
+            )}
           </div>
+
+          <div className="planet-score">
+            <strong>{results.planetas}</strong>
+            <span>Planetas Tierra</span>
+          </div>
+
+          <button onClick={handleRestart} className="planet-button eco-glow-button">
+            Volver a evaluar
+            <span className="material-symbols-outlined">refresh</span>
+          </button>
         </div>
       </section>
 
-      {/* SECCIÓN DE RECOMENDACIONES (DINÁMICA) */}
-      <section className="space-y-6 md:space-y-8 pt-6 md:pt-8 border-t border-surface-container-highest">
-        <div className="flex justify-between items-end">
-          <h2 className="text-3xl md:text-4xl font-headline font-extrabold tracking-tighter text-primary">Acciones Sugeridas</h2>
+      <section className="tips-section">
+        <div className="tips-header animate-rise">
+          <h2 className="tips-title">Acciones Sugeridas</h2>
+          <p className="tips-lead">Prioriza estos cambios para reducir tu categoria mas critica: {highestCategory.title}.</p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+        <div className="tips-grid">
           {currentTips.map((tip, index) => (
-            // Alineación vertical en móvil, horizontal en desktop
-            <div key={index} className="bg-surface-container-lowest rounded-[24px] p-6 md:p-8 flex flex-col sm:flex-row items-start gap-4 md:gap-6 editorial-shadow hover:bg-white transition-colors duration-300">
-              <div className="h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-[16px] md:rounded-[20px] overflow-hidden bg-surface-container-low flex items-center justify-center">
-                <span className={`material-symbols-outlined text-3xl md:text-4xl text-${highestCategory.color}`}>{tip.icon}</span>
+            <div key={tip.titulo} className="tip-card hover-lift animate-pop" style={{ animationDelay: `${index * 120}ms` }}>
+              <div className="tip-icon">
+                <span className={`material-symbols-outlined text-3xl ${highestTextClass}`}>{tip.icon}</span>
               </div>
               <div>
-                <span className={`text-[10px] md:text-xs font-label font-bold text-${highestCategory.color} uppercase tracking-widest mb-1 block`}>
-                  Impacto Crítico: {highestCategory.title}
-                </span>
-                <h3 className="text-lg md:text-xl font-headline font-bold text-on-surface mb-2 leading-tight">{tip.titulo}</h3>
-                <p className="font-body text-on-surface-variant text-sm mb-4 leading-relaxed">
-                  {tip.desc}
-                </p>
-                <div className="flex items-center gap-2 text-primary font-bold text-xs md:text-sm bg-primary-container/30 inline-flex px-3 py-1.5 rounded-full">
+                <span className="tip-kicker">Impacto critico: {highestCategory.title}</span>
+                <h3>{tip.titulo}</h3>
+                <p>{tip.desc}</p>
+                <div className="saving-pill">
                   <span className="material-symbols-outlined text-sm">energy_savings_leaf</span>
                   <span>Ahorro: {tip.ahorro}</span>
                 </div>
@@ -248,7 +245,6 @@ export default function ResultsDashboard({ answers, onRestart }) {
           ))}
         </div>
       </section>
-      
-    </main>
+    </div>
   );
 }

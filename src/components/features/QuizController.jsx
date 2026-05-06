@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import QuestionCard from './QuestionCard';
 import quizData from '../../data/questions.json';
 
@@ -11,6 +12,7 @@ const allQuestions = quizData.modules.flatMap(module =>
 );
 
 export default function QuizController({ onFinish, onCancel }) {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { 'h_personas': '2 personas', ... }
 
@@ -29,7 +31,13 @@ export default function QuizController({ onFinish, onCancel }) {
       setCurrentIndex(currentIndex + 1);
     } else {
       // Fin del cuestionario, enviamos los datos al Dashboard
-      onFinish(answers);
+      localStorage.setItem('quizAnswers', JSON.stringify(answers));
+      if (onFinish) {
+        onFinish(answers);
+        return;
+      }
+
+      navigate('/dashboard');
     }
   };
 

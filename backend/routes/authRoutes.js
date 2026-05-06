@@ -4,6 +4,8 @@ import {
   login,
   getProfile,
   updateProfile,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/authController.js";
 import { auth } from "../middleware/auth.js";
 
@@ -11,6 +13,8 @@ const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 router.get("/profile", auth, getProfile);
 router.put("/profile", auth, updateProfile);
 

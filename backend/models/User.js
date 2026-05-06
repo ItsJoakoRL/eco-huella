@@ -23,6 +23,46 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
       select: false,
     },
+    age: {
+      type: Number,
+      min: 13,
+      max: 120,
+    },
+    city: {
+      type: String,
+      trim: true,
+    },
+    province: {
+      type: String,
+      trim: true,
+    },
+    country: {
+      type: String,
+      trim: true,
+      default: "Argentina",
+    },
+    occupation: {
+      type: String,
+      trim: true,
+    },
+    householdSize: {
+      type: Number,
+      min: 1,
+      max: 20,
+      default: 1,
+    },
+    sustainabilityGoal: {
+      type: String,
+      trim: true,
+    },
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      select: false,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],

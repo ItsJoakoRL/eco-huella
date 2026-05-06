@@ -1,10 +1,16 @@
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Button from "../ui/Button";
 
 export default function Layout({ children }) {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const initials = user?.name
+    ?.split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   const handleLogout = () => {
     logout();
@@ -12,64 +18,58 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div className="bg-surface text-on-surface font-body min-h-screen flex flex-col">
-      {/* TopNavBar */}
-      <header className="bg-surface border-b border-outline">
-        <nav className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
-          <div 
-            onClick={() => navigate("/")}
-            className="text-2xl font-black text-primary tracking-tighter font-headline cursor-pointer"
-          >
-            EcoHuella
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {user && (
-              <>
-                <span className="text-sm text-on-surface-variant">
-                  {user.name}
-                </span>
-                
-                <Button 
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  Dashboard
-                </Button>
+    <div className="app-shell flex min-h-screen flex-col font-body text-on-surface">
+      <header className="app-header">
+        <nav className="app-nav">
+          <button className="brand-lockup" onClick={() => navigate("/")}>
+            <span className="brand-mark">
+              <span className="material-symbols-outlined text-2xl">eco</span>
+            </span>
+            <span className="brand-text">
+              <span className="brand-name">EcoHuella</span>
+              <span className="brand-subtitle">Impacto sostenible</span>
+            </span>
+          </button>
 
-                {isAdmin && (
-                  <Button 
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => navigate("/admin")}
-                  >
-                    Admin
-                  </Button>
-                )}
+          {user && (
+            <div className="nav-actions">
+              <div className="user-chip">
+                <span className="user-avatar">{initials || "EH"}</span>
+                <span className="text-sm font-semibold text-on-surface-variant">{user.name}</span>
+              </div>
 
-                <Button 
-                  size="sm"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </>
-            )}
-          </div>
+              <button className="nav-pill" onClick={() => navigate("/dashboard")}>
+                <span className="material-symbols-outlined text-xl">monitoring</span>
+                Dashboard
+              </button>
+
+              {isAdmin && (
+                <button className="nav-pill" onClick={() => navigate("/admin")}>
+                  <span className="material-symbols-outlined text-xl">admin_panel_settings</span>
+                  Admin
+                </button>
+              )}
+
+              <button className="nav-pill primary eco-glow-button" onClick={handleLogout}>
+                <span className="material-symbols-outlined text-xl">logout</span>
+                Salir
+              </button>
+            </div>
+          )}
         </nav>
       </header>
 
-      {/* Contenido Dinámico de la Página */}
-      <main className="flex-grow">
-        {children}
-      </main>
+      <main className="flex-grow">{children}</main>
 
-      {/* Footer (Desktop) */}
-      <footer className="hidden md:block py-16 px-6 bg-surface-container-highest border-t border-outline-variant/10">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="text-xl font-bold text-primary font-headline">EcoHuella</div>
-          <div className="text-on-surface-variant text-sm">© 2026 EcoHuella. Diseñando un futuro regenerativo.</div>
+      <footer className="app-footer hidden md:block">
+        <div className="app-footer-inner">
+          <div>
+            <div className="font-headline text-xl font-black tracking-tight text-primary">EcoHuella</div>
+            <div className="mt-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+              Disenando un futuro regenerativo
+            </div>
+          </div>
+          <div className="text-sm text-on-surface-variant">2026 EcoHuella</div>
         </div>
       </footer>
     </div>

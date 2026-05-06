@@ -1,7 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { parametersAPI } from "../services/api";
-import Button from "../ui/Button";
-import Card from "../ui/Card";
+import React, { useEffect, useState } from "react";
+import { parametersAPI } from "../../services/api";
+
+const categories = ["housing", "transport", "food", "waste"];
+
+const categoryLabels = {
+  housing: "Hogar",
+  transport: "Transporte",
+  food: "Alimentacion",
+  waste: "Residuos",
+};
+
+const categoryIcons = {
+  housing: "home",
+  transport: "local_shipping",
+  food: "restaurant",
+  waste: "recycling",
+};
 
 const ParameterManagement = () => {
   const [parameters, setParameters] = useState(null);
@@ -23,7 +37,7 @@ const ParameterManagement = () => {
       }
       setError("");
     } catch (err) {
-      setError("Error al cargar parámetros");
+      setError("No se pudieron cargar los parametros.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -43,11 +57,10 @@ const ParameterManagement = () => {
           [editingCategory]: formData,
         },
       });
-      alert("Parámetros actualizados");
       setEditingCategory(null);
       loadParameters();
     } catch (err) {
-      setError("Error al actualizar parámetros");
+      setError("No se pudieron actualizar los parametros.");
       console.error(err);
     }
   };
@@ -56,87 +69,128 @@ const ParameterManagement = () => {
     setFormData({ ...formData, [key]: parseFloat(value) || value });
   };
 
-  if (loading) return <p>Cargando parámetros...</p>;
-  if (!parameters) return <p>No hay parámetros disponibles</p>;
+  if (loading) {
+    return (
+      <div className="admin-card admin-loading">
+        <span className="material-symbols-outlined animate-pulse-soft">
+          progress_activity
+        </span>
+        Cargando parametros...
+      </div>
+    );
+  }
 
-  const categories = ["housing", "transport", "food", "waste"];
-  const categoryLabels = {
-    housing: "Hogar",
-    transport: "Transporte",
-    food: "Alimentación",
-    waste: "Residuos",
-  };
+  if (!parameters) {
+    return (
+      <div className="admin-card admin-empty">
+        <span className="material-symbols-outlined">database_off</span>
+        <h3>No hay parametros disponibles</h3>
+        <p>Cuando se carguen en la base de datos apareceran aca.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-on-surface">Parámetros de Emisión</h2>
-
-      {error && (
-        <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
+    <div className="admin-section">
+      <header className="admin-section-head">
+        <div>
+          <span className="admin-kicker">Modelo de calculo</span>
+          <h2>Parametros de emision</h2>
+          <p>Ajusta los factores que alimentan el resultado final del usuario.</p>
         </div>
-      )}
+        <span className="admin-count">{categories.length} categorias</span>
+      </header>
+
+      {error && <div className="admin-alert">{error}</div>}
 
       {editingCategory ? (
-        <Card>
-          <h3 className="text-xl font-semibold mb-4 text-on-surface">
-            Editar: {categoryLabels[editingCategory]}
-          </h3>
+        <div className="admin-card admin-form animate-pop">
+          <div className="admin-form-head">
+            <span className="material-symbols-outlined">
+              {categoryIcons[editingCategory]}
+            </span>
+            <div>
+              <h3>Editar {categoryLabels[editingCategory]}</h3>
+              <p>Modifica cada factor y guarda para recalcular nuevos resultados.</p>
+            </div>
+          </div>
 
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="admin-param-editor">
             {Object.entries(formData).map(([key, value]) => (
-              <div key={key}>
-                <label className="block text-sm font-medium text-on-surface mb-1">
-                  {key}
-                </label>
+              <label key={key}>
+                {key}
                 <input
                   type="number"
                   step="0.01"
                   value={value}
-                  onChange={(e) => handleInputChange(key, e.target.value)}
-                  className="w-full px-3 py-2 border border-outline rounded"
+                  onChange={(event) => handleInputChange(key, event.target.value)}
+                  className="admin-input"
                 />
-              </div>
+              </label>
             ))}
           </div>
 
-          <div className="flex gap-2 mt-4">
-            <Button onClick={handleUpdate} className="flex-1">
-              Guardar
-            </Button>
-            <Button
-              variant="secondary"
-              className="flex-1"
+          <div className="admin-form-actions">
+            <button
+              type="button"
+              className="admin-primary-button"
+              onClick={handleUpdate}
+            >
+              Guardar parametros
+            </button>
+            <button
+              type="button"
+              className="admin-secondary-button"
               onClick={() => setEditingCategory(null)}
             >
               Cancelar
-            </Button>
+            </button>
           </div>
-        </Card>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {categories.map((cat) => (
-            <Card key={cat}>
-              <h3 className="text-lg font-semibold mb-3 text-on-surface">
-                {categoryLabels[cat]}
-              </h3>
-              <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
-                {Object.entries(parameters.parameters[cat]).map(([key, value]) => (
-                  <div key={key} className="text-sm">
-                    <span className="font-medium text-on-surface-variant">{key}:</span>
-                    <span className="ml-2 text-on-surface">{value}</span>
-                  </div>
-                ))}
-              </div>
-              <Button
-                size="sm"
-                onClick={() => handleEdit(cat)}
-                className="w-full"
+        <div className="admin-param-grid">
+          {categories.map((category, index) => {
+            const values = parameters.parameters[category] || {};
+            const entries = Object.entries(values);
+
+            return (
+              <article
+                key={category}
+                className="admin-param-card hover-lift animate-rise"
+                style={{ animationDelay: `${index * 65}ms` }}
               >
-                Editar
-              </Button>
-            </Card>
-          ))}
+                <div className="admin-param-head">
+                  <span className="admin-item-icon">
+                    <span className="material-symbols-outlined">
+                      {categoryIcons[category]}
+                    </span>
+                  </span>
+                  <div>
+                    <h3>{categoryLabels[category]}</h3>
+                    <p>{entries.length} factores configurados</p>
+                  </div>
+                </div>
+
+                <div className="admin-kv-list">
+                  {entries.slice(0, 6).map(([key, value]) => (
+                    <div key={key} className="admin-kv">
+                      <span>{key}</span>
+                      <strong>{value}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-secondary-button wide"
+                  onClick={() => handleEdit(category)}
+                >
+                  <span className="material-symbols-outlined">tune</span>
+                  Editar categoria
+                </button>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

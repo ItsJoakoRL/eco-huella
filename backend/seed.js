@@ -23,6 +23,13 @@ const seedDatabase = async () => {
       email: "admin@eco-huella.com",
       password: "admin123456",
       role: "admin",
+      age: 34,
+      city: "Mendoza",
+      province: "Mendoza",
+      country: "Argentina",
+      occupation: "Administrador ambiental",
+      householdSize: 2,
+      sustainabilityGoal: "learn",
     });
     console.log("✓ Admin creado:", admin.email);
 
@@ -32,6 +39,13 @@ const seedDatabase = async () => {
       email: "user@eco-huella.com",
       password: "user123456",
       role: "user",
+      age: 24,
+      city: "San Rafael",
+      province: "Mendoza",
+      country: "Argentina",
+      occupation: "Estudiante",
+      householdSize: 3,
+      sustainabilityGoal: "reduce_energy",
     });
     console.log("✓ Usuario test creado:", user.email);
 

@@ -11,6 +11,10 @@ export default {
         "primary-container": "#acead3",
         "on-primary": "#c5ffe9",
         "on-primary-container": "#195847",
+        "secondary": "#1a4314",
+        "secondary-container": "#d8f2c4",
+        "secondary-fixed-dim": "#b9dda0",
+        "on-secondary-container": "#10330c",
         "surface": "#f8f6f2",
         "surface-container-lowest": "#ffffff",
         "surface-container-low": "#f2f1ec",
@@ -22,6 +26,7 @@ export default {
         "tertiary": "#7b5400",
         "tertiary-container": "#feb300",
         "on-tertiary-fixed": "#382400",
+        "outline": "#8f918d",
         "outline-variant": "#aeadaa",
       },
       borderRadius: {
