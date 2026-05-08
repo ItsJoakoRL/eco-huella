@@ -12,8 +12,13 @@ const getMailTransport = () => {
 
   if (gmailUser && gmailAppPassword) {
     return nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       ...timeoutOptions,
+      tls: {
+        servername: "smtp.gmail.com",
+      },
       auth: {
         user: gmailUser,
         pass: gmailAppPassword,
