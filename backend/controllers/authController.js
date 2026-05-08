@@ -4,9 +4,11 @@ import crypto from "crypto";
 import { sendPasswordResetCode } from "../utils/emailService.js";
 
 const generateToken = (userId, role) => {
-  return jwt.sign({ userId, role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
-  });
+  return jwt.sign(
+    { userId, role },
+    process.env.JWT_SECRET || "ecohuella-default-secret",
+    { expiresIn: process.env.JWT_EXPIRE || "7d" }
+  );
 };
 
 export const signup = async (req, res) => {
