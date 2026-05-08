@@ -35,6 +35,20 @@ const AdminPanel = () => {
 
   return (
     <main className="admin-page">
+      <div className="admin-nature-layer" aria-hidden="true">
+        <span className="admin-leaf leaf-a material-symbols-outlined">eco</span>
+        <span className="admin-leaf leaf-b material-symbols-outlined">
+          psychiatry
+        </span>
+        <span className="admin-leaf leaf-c material-symbols-outlined">
+          energy_savings_leaf
+        </span>
+        <span className="admin-leaf leaf-d material-symbols-outlined">
+          local_florist
+        </span>
+        <span className="admin-vine" />
+      </div>
+
       <section className="admin-hero animate-rise">
         <div>
           <span className="admin-eyebrow">Centro de control</span>
