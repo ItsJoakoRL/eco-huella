@@ -26,7 +26,12 @@ const tabs = [
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("users");
+  const [refreshKey, setRefreshKey] = useState(0);
   const activeTabInfo = tabs.find((tab) => tab.id === activeTab);
+
+  const refreshPanel = () => {
+    setRefreshKey((current) => current + 1);
+  };
 
   return (
     <main className="admin-page">
@@ -51,24 +56,41 @@ const AdminPanel = () => {
         </div>
       </section>
 
-      <nav className="admin-tabs animate-pop" aria-label="Secciones de administracion">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={`admin-tab ${activeTab === tab.id ? "active" : ""}`}
-          >
-            <span className="material-symbols-outlined">{tab.icon}</span>
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </nav>
+      <div className="admin-toolbar animate-pop">
+        <nav className="admin-tabs" aria-label="Secciones de administracion">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`admin-tab ${activeTab === tab.id ? "active" : ""}`}
+            >
+              <span className="material-symbols-outlined">{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <button
+          type="button"
+          className="admin-refresh-button"
+          onClick={refreshPanel}
+          title="Actualizar panel"
+          aria-label="Actualizar panel de administracion"
+        >
+          <span className="material-symbols-outlined">refresh</span>
+          <span>Actualizar</span>
+        </button>
+      </div>
 
       <section className="admin-panel-body animate-rise">
-        {activeTab === "users" && <UserManagement />}
-        {activeTab === "questions" && <QuestionManagement />}
-        {activeTab === "parameters" && <ParameterManagement />}
+        {activeTab === "users" && <UserManagement key={`users-${refreshKey}`} />}
+        {activeTab === "questions" && (
+          <QuestionManagement key={`questions-${refreshKey}`} />
+        )}
+        {activeTab === "parameters" && (
+          <ParameterManagement key={`parameters-${refreshKey}`} />
+        )}
       </section>
     </main>
   );
