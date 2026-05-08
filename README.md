@@ -107,14 +107,23 @@ npm install
 2. Levantar entorno de desarrollo:
 
 ```bash
-npm run dev
+npm run dev:all
 ```
 
-3. Abrir la URL que imprime Vite (por defecto http://localhost:5173).
+En PowerShell de Windows, si `npm` aparece bloqueado, usar:
+
+```powershell
+npm.cmd run dev:all
+```
+
+Tambien se puede abrir `start-dev.bat`.
+
+3. Abrir http://localhost:8080/login.
 
 ## Scripts disponibles
 
-- npm run dev: inicia servidor de desarrollo con HMR.
+- npm run dev: inicia solo el frontend con HMR.
+- npm run dev:all: inicia frontend y backend juntos.
 - npm run build: genera build de produccion.
 - npm run preview: previsualiza build local.
 - npm run lint: ejecuta analisis estatico.

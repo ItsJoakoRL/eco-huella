@@ -3,8 +3,37 @@
     "tasks": [
         {
             "label": "Iniciar Vite",
-            "type": "npm",
-            "script": "dev",
+            "type": "shell",
+            "command": "npm.cmd",
+            "args": [
+                "run",
+                "dev:all"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "eco-huella",
+                "pattern": {
+                    "regexp": "^$"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": ".*Local:\\s+http://(?:localhost|127\\.0\\.0\\.1):8080/.*"
+                }
+            }
+        },
+        {
+            "label": "Iniciar Vite solo frontend",
+            "type": "shell",
+            "command": "npm.cmd",
+            "args": [
+                "run",
+                "dev"
+            ],
             "isBackground": true,
             "problemMatcher": {
                 "owner": "vite",
@@ -17,6 +46,20 @@
                     "endsPattern": ".*Local:\\s+http://(?:localhost|127\\.0\\.0\\.1):8080/.*"
                 }
             }
+        },
+        {
+            "label": "Iniciar Backend solo API",
+            "type": "shell",
+            "command": "npm.cmd",
+            "args": [
+                "run",
+                "dev"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}\\backend"
+            },
+            "isBackground": true,
+            "problemMatcher": []
         }
     ]
 }

@@ -1,18 +1,40 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import quizData from "../../data/questions.json";
+import { useAuth } from "../../context/AuthContext";
+import { deleteQuizAttempt, loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
+
+const formatAttemptDate = (dateValue) =>
+  new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(dateValue));
 
 export default function ResultsDashboard({ answers, onRestart }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [selectedAttempt, setSelectedAttempt] = useState(null);
+  const [attemptToDelete, setAttemptToDelete] = useState(null);
+  const [storedAnswers, setStoredAnswers] = useState(() => loadQuizAnswers(user));
+  const [quizHistory, setQuizHistory] = useState(() => loadQuizHistory(user));
+
+  useEffect(() => {
+    setStoredAnswers(loadQuizAnswers(user));
+    setQuizHistory(loadQuizHistory(user));
+    setSelectedAttempt(null);
+  }, [user]);
+
   const answersData = useMemo(() => {
     if (answers) return answers;
+    if (selectedAttempt?.answers) return selectedAttempt.answers;
+    return storedAnswers;
+  }, [answers, selectedAttempt, storedAnswers]);
 
-    try {
-      return JSON.parse(localStorage.getItem("quizAnswers") || "{}");
-    } catch {
-      return {};
-    }
-  }, [answers]);
+  const hasAnswers = Object.keys(answersData).length > 0;
+  const activeAttemptId = selectedAttempt?.id || quizHistory[0]?.id;
 
   const results = useMemo(() => {
     const getOption = (moduleId, questionId) => {
@@ -124,6 +146,61 @@ export default function ResultsDashboard({ answers, onRestart }) {
 
     navigate("/quiz");
   };
+  const handleDeleteAttempt = (event, attempt) => {
+    event.stopPropagation();
+    setAttemptToDelete(attempt);
+  };
+  const confirmDeleteAttempt = () => {
+    if (!attemptToDelete) return;
+
+    const nextHistory = deleteQuizAttempt(user, attemptToDelete.id);
+    setQuizHistory(nextHistory);
+
+    if (selectedAttempt?.id === attemptToDelete.id) {
+      setSelectedAttempt(nextHistory[0] || null);
+    }
+
+    setStoredAnswers(nextHistory[0]?.answers || {});
+    setAttemptToDelete(null);
+  };
+
+  if (!hasAnswers) {
+    return (
+      <div className="eco-aurora dashboard-page dashboard-empty-state">
+        <section className="dashboard-hero">
+          <div className="animate-rise">
+            <span className="dashboard-eyebrow">Encuesta inicial</span>
+            <h1 className="dashboard-title">
+              Empeza desde <span>cero.</span>
+            </h1>
+            <p className="dashboard-lead">
+              Esta cuenta todavia no completo la encuesta ambiental. Responde unas preguntas para calcular una huella propia, sin usar datos de otros usuarios.
+            </p>
+            <button onClick={handleRestart} className="planet-button eco-glow-button dashboard-start-button">
+              Iniciar encuesta
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+
+          <div className="impact-card hover-lift animate-pop" style={{ animationDelay: "140ms" }}>
+            <p className="impact-label">Estado de la evaluacion</p>
+            <div className="impact-value">
+              <strong>0</strong>
+              <span>respuestas</span>
+            </div>
+            <div className="impact-diff">
+              <div className="impact-diff-icon">
+                <span className="material-symbols-outlined">assignment</span>
+              </div>
+              <div>
+                Tus resultados apareceran cuando termines la encuesta.
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="eco-aurora dashboard-page">
@@ -220,6 +297,54 @@ export default function ResultsDashboard({ answers, onRestart }) {
         </div>
       </section>
 
+      {quizHistory.length > 0 && (
+        <section className="survey-history-section animate-rise">
+          <div className="tips-header">
+            <h2 className="tips-title">Historial de encuestas</h2>
+            <p className="tips-lead">
+              Revisa resultados anteriores y compara como va cambiando tu huella.
+            </p>
+          </div>
+
+          <div className="survey-history-grid">
+            {quizHistory.map((attempt, index) => (
+              <div
+                key={attempt.id}
+                role="button"
+                tabIndex={0}
+                className={`survey-history-card hover-lift ${activeAttemptId === attempt.id ? "active" : ""}`}
+                onClick={() => setSelectedAttempt(attempt)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    setSelectedAttempt(attempt);
+                  }
+                }}
+                style={{ animationDelay: `${index * 55}ms` }}
+              >
+                <span className="survey-history-icon material-symbols-outlined">assignment_turned_in</span>
+                <span>
+                  <strong>
+                    {index === 0 ? "Encuesta mas reciente" : `Encuesta ${quizHistory.length - index}`}
+                  </strong>
+                  <small>{formatAttemptDate(attempt.createdAt)}</small>
+                </span>
+                <span className="survey-history-action">
+                  {activeAttemptId === attempt.id ? "Viendo" : "Ver resultado"}
+                </span>
+                <button
+                  type="button"
+                  className="survey-history-delete"
+                  title="Eliminar encuesta"
+                  onClick={(event) => handleDeleteAttempt(event, attempt)}
+                >
+                  <span className="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="tips-section">
         <div className="tips-header animate-rise">
           <h2 className="tips-title">Acciones Sugeridas</h2>
@@ -245,6 +370,24 @@ export default function ResultsDashboard({ answers, onRestart }) {
           ))}
         </div>
       </section>
+
+      {attemptToDelete && (
+        <div className="confirm-modal-backdrop" role="dialog" aria-modal="true" aria-label="Eliminar cuestionario">
+          <div className="confirm-modal animate-pop">
+            <span className="confirm-modal-icon material-symbols-outlined">delete</span>
+            <h2>Seguro que quieres eliminar este cuestionario</h2>
+            <p>Esta accion quitara el resultado del historial de encuestas.</p>
+            <div className="confirm-modal-actions">
+              <button type="button" className="admin-secondary-button" onClick={() => setAttemptToDelete(null)}>
+                Cancelar
+              </button>
+              <button type="button" className="admin-primary-button danger" onClick={confirmDeleteAttempt}>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

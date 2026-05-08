@@ -30,9 +30,13 @@ export const updateUser = async (req, res) => {
   try {
     const {
       name,
+      username,
       email,
       role,
+      password,
       age,
+      birthDate,
+      sex,
       city,
       province,
       country,
@@ -41,26 +45,36 @@ export const updateUser = async (req, res) => {
       sustainabilityGoal,
     } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      {
-        name,
-        email,
-        role,
-        age,
-        city,
-        province,
-        country,
-        occupation,
-        householdSize,
-        sustainabilityGoal,
-      },
-      { new: true, runValidators: true }
-    ).select("-password");
-
+    const user = await User.findById(req.params.id).select("+password");
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
+
+    user.name = name;
+    user.username = username;
+    user.email = email;
+    user.role = role;
+    user.age = age;
+    user.birthDate = birthDate;
+    user.sex = sex;
+    user.city = city;
+    user.province = province;
+    user.country = country;
+    user.occupation = occupation;
+    user.householdSize = householdSize;
+    user.sustainabilityGoal = sustainabilityGoal;
+
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({
+          message: "La contraseña debe tener al menos 6 caracteres",
+        });
+      }
+      user.password = password;
+    }
+
+    await user.save();
+    user.password = undefined;
 
     res.status(200).json({
       message: "Usuario actualizado exitosamente",

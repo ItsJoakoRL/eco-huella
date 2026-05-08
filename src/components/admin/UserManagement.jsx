@@ -1,9 +1,27 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { usersAPI } from "../../services/api";
 
 const roleLabels = {
   admin: "Administrador",
   user: "Usuario",
+};
+
+const formatDateInput = (dateValue) => {
+  if (!dateValue) return "";
+  return new Date(dateValue).toISOString().slice(0, 10);
+};
+
+const calculateAge = (birthDate) => {
+  if (!birthDate) return "";
+  const today = new Date();
+  const born = new Date(`${birthDate}T00:00:00`);
+  let years = today.getFullYear() - born.getFullYear();
+  const monthDiff = today.getMonth() - born.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < born.getDate())) {
+    years -= 1;
+  }
+  return years;
 };
 
 const UserManagement = () => {
@@ -12,17 +30,24 @@ const UserManagement = () => {
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [pendingDeleteUser, setPendingDeleteUser] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
+    username: "",
     email: "",
     role: "user",
     age: "",
+    birthDate: "",
+    sex: "",
     city: "",
     province: "",
     country: "Argentina",
     occupation: "",
     householdSize: "1",
     sustainabilityGoal: "",
+    password: "",
+    confirmPassword: "",
   });
 
   useEffect(() => {
@@ -30,6 +55,12 @@ const UserManagement = () => {
   }, []);
 
   const loadUsers = async () => {
+    const calculatedAge = calculateAge(formData.birthDate);
+    if (formData.birthDate && calculatedAge < 13) {
+      setError("La persona debe tener al menos 13 anos.");
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await usersAPI.getAll();
@@ -45,11 +76,28 @@ const UserManagement = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    if (formData.password && formData.password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
     try {
       if (editingId) {
+        const { confirmPassword, ...payload } = formData;
         await usersAPI.update(editingId, {
-          ...formData,
-          age: formData.age ? Number(formData.age) : undefined,
+          ...payload,
+          password: payload.password || undefined,
+          age: payload.birthDate
+            ? calculatedAge
+            : formData.age
+              ? Number(formData.age)
+              : undefined,
+          birthDate: payload.birthDate || undefined,
           householdSize: formData.householdSize
             ? Number(formData.householdSize)
             : undefined,
@@ -63,11 +111,19 @@ const UserManagement = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Seguro que quieres eliminar este usuario?")) return;
+  const requestDelete = (user) => {
+    setPendingDeleteUser(user);
+  };
 
+  const cancelDelete = () => {
+    setPendingDeleteUser(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteUser) return;
     try {
-      await usersAPI.delete(id);
+      await usersAPI.delete(pendingDeleteUser._id);
+      setPendingDeleteUser(null);
       loadUsers();
     } catch (err) {
       setError("No se pudo eliminar el usuario.");
@@ -88,34 +144,46 @@ const UserManagement = () => {
   const handleEdit = (user) => {
     setFormData({
       name: user.name || "",
+      username: user.username || "",
       email: user.email || "",
       role: user.role || "user",
       age: user.age || "",
+      birthDate: formatDateInput(user.birthDate),
+      sex: user.sex || "",
       city: user.city || "",
       province: user.province || "",
       country: user.country || "Argentina",
       occupation: user.occupation || "",
       householdSize: user.householdSize || "1",
       sustainabilityGoal: user.sustainabilityGoal || "",
+      password: "",
+      confirmPassword: "",
     });
     setEditingId(user._id);
+    setShowPassword(false);
     setShowForm(true);
   };
 
   const resetForm = () => {
     setFormData({
       name: "",
+      username: "",
       email: "",
       role: "user",
       age: "",
+      birthDate: "",
+      sex: "",
       city: "",
       province: "",
       country: "Argentina",
       occupation: "",
       householdSize: "1",
       sustainabilityGoal: "",
+      password: "",
+      confirmPassword: "",
     });
     setEditingId(null);
+    setShowPassword(false);
     setShowForm(false);
   };
 
@@ -170,6 +238,19 @@ const UserManagement = () => {
             </label>
 
             <label>
+              Nombre de usuario
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(event) =>
+                  setFormData({ ...formData, username: event.target.value })
+                }
+                className="admin-input"
+                required
+              />
+            </label>
+
+            <label>
               Rol
               <select
                 value={formData.role}
@@ -184,6 +265,23 @@ const UserManagement = () => {
             </label>
 
             <label>
+              Fecha de nacimiento
+              <input
+                type="date"
+                value={formData.birthDate}
+                onChange={(event) => {
+                  const nextAge = calculateAge(event.target.value);
+                  setFormData({
+                    ...formData,
+                    birthDate: event.target.value,
+                    age: nextAge || "",
+                  });
+                }}
+                className="admin-input"
+              />
+            </label>
+
+            <label>
               Edad
               <input
                 type="number"
@@ -194,7 +292,24 @@ const UserManagement = () => {
                   setFormData({ ...formData, age: event.target.value })
                 }
                 className="admin-input"
+                disabled={Boolean(formData.birthDate)}
               />
+            </label>
+
+            <label>
+              Sexo
+              <select
+                value={formData.sex}
+                onChange={(event) =>
+                  setFormData({ ...formData, sex: event.target.value })
+                }
+                className="admin-input"
+              >
+                <option value="">Sin definir</option>
+                <option value="female">Mujer</option>
+                <option value="male">Hombre</option>
+                <option value="prefer_not_say">Prefiero no decir</option>
+              </select>
             </label>
 
             <label>
@@ -282,6 +397,61 @@ const UserManagement = () => {
                 <option value="learn">Aprender y medir impacto</option>
               </select>
             </label>
+
+            <label>
+              Nueva contraseña
+              <span className="admin-password-input">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(event) =>
+                    setFormData({ ...formData, password: event.target.value })
+                  }
+                  className="admin-input"
+                  placeholder="Dejar vacio para no cambiarla"
+                />
+                <button
+                  type="button"
+                  className="admin-password-toggle"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  <span className="material-symbols-outlined">
+                    {showPassword ? "visibility" : "visibility_off"}
+                  </span>
+                </button>
+              </span>
+            </label>
+
+            <label>
+              Confirmar contraseña
+              <span className="admin-password-input">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: event.target.value,
+                    })
+                  }
+                  className="admin-input"
+                  placeholder="Repetir nueva contraseña"
+                />
+                <button
+                  type="button"
+                  className="admin-password-toggle"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  <span className="material-symbols-outlined">
+                    {showPassword ? "visibility" : "visibility_off"}
+                  </span>
+                </button>
+              </span>
+            </label>
           </div>
 
           <div className="admin-form-actions">
@@ -333,7 +503,10 @@ const UserManagement = () => {
                         </span>
                         <div>
                           <strong>{user.name}</strong>
-                          <small>{roleLabels[user.role] || user.role}</small>
+                          <small>
+                            @{user.username || "sin_usuario"} -{" "}
+                            {roleLabels[user.role] || user.role}
+                          </small>
                         </div>
                       </div>
                     </td>
@@ -348,6 +521,14 @@ const UserManagement = () => {
                         <span>
                           <span className="material-symbols-outlined">cake</span>
                           {user.age ? `${user.age} anos` : "Edad pendiente"}
+                        </span>
+                        <span>
+                          <span className="material-symbols-outlined">wc</span>
+                          {user.sex === "female"
+                            ? "Mujer"
+                            : user.sex === "male"
+                              ? "Hombre"
+                              : "Sexo pendiente"}
                         </span>
                         <span>
                           <span className="material-symbols-outlined">home</span>
@@ -388,7 +569,7 @@ const UserManagement = () => {
                         <button
                           type="button"
                           className="admin-icon-button danger"
-                          onClick={() => handleDelete(user._id)}
+                          onClick={() => requestDelete(user)}
                           title="Eliminar usuario"
                         >
                           <span className="material-symbols-outlined">delete</span>
@@ -402,6 +583,33 @@ const UserManagement = () => {
           </div>
         )}
       </div>
+
+      {pendingDeleteUser && createPortal(
+        <div
+          className="confirm-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Eliminar correo"
+        >
+          <div className="confirm-modal animate-pop">
+            <span className="confirm-modal-icon material-symbols-outlined">delete</span>
+            <h2>Seguro que quieres eliminar este correo?</h2>
+            <p>
+              Se eliminara la cuenta asociada a <strong>{pendingDeleteUser.email}</strong>.
+              Esta accion no se puede deshacer.
+            </p>
+            <div className="confirm-modal-actions">
+              <button type="button" className="admin-secondary-button" onClick={cancelDelete}>
+                Cancelar
+              </button>
+              <button type="button" className="admin-primary-button danger" onClick={confirmDelete}>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

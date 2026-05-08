@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Pages
 import LoginPage from "./components/auth/LoginPage";
 import SignupPage from "./components/auth/SignupPage";
+import TermsAndConditionsPage from "./components/legal/TermsAndConditionsPage";
 import LandingPage from "./components/features/LandingPage";
 import QuizController from "./components/features/QuizController";
 import ResultsDashboard from "./components/features/ResultsDashboard";
@@ -13,12 +14,18 @@ import Layout from "./components/layout/Layout";
 
 export default function App() {
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <AuthProvider>
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/terminos-y-condiciones" element={<TermsAndConditionsPage />} />
 
           {/* Protected routes */}
           <Route

@@ -92,7 +92,23 @@ Esto creará:
 
 ## Ejecución
 
-### Terminal 1 - Backend
+### Opcion recomendada - Frontend y backend juntos
+
+```bash
+npm run dev:all
+```
+
+En PowerShell de Windows, si `npm` aparece bloqueado, usar:
+
+```powershell
+npm.cmd run dev:all
+```
+
+Tambien se puede abrir `start-dev.bat`.
+
+La app estara en: `http://localhost:8080/login`
+
+### Opcion manual - Terminal 1 Backend
 
 ```bash
 cd backend
@@ -108,7 +124,7 @@ El servidor estará en: `http://localhost:5000`
 npm run dev
 ```
 
-La app estará en: `http://localhost:5173`
+La app estara en: `http://localhost:8080`
 
 ## Flujo de la Aplicación
 
@@ -194,6 +210,7 @@ La autenticación usa **JWT** (JSON Web Tokens):
 **Frontend:**
 ```bash
 npm run dev      # Iniciar servidor de desarrollo
+npm run dev:all  # Iniciar frontend y backend juntos
 npm run build    # Build de producción
 npm run preview  # Preview del build
 npm run lint     # Análisis estático

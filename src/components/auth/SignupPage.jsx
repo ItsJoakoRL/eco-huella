@@ -2,28 +2,35 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../ui/Button";
+import ecoHuellaLogo from "../../assets/eco-huella-logo-generated.png";
 
 const inputClasses = "signup-input";
 
 const fieldLabels = {
   name: "Nombre completo",
+  username: "Nombre de usuario",
   email: "Correo electronico",
   age: "Edad",
+  birthDate: "Fecha de nacimiento",
+  sex: "Sexo",
   city: "Ciudad",
   province: "Provincia",
   country: "Pais",
   occupation: "Ocupacion",
   householdSize: "Personas en el hogar",
   sustainabilityGoal: "Objetivo ambiental",
-  password: "Contrasena",
-  confirmPassword: "Confirmar contrasena",
+  password: "Contraseña",
+  confirmPassword: "Confirmar contraseña",
 };
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
     name: "",
+    username: "",
     email: "",
     age: "",
+    birthDate: "",
+    sex: "",
     city: "",
     province: "",
     country: "Argentina",
@@ -35,6 +42,7 @@ const SignupPage = () => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -42,17 +50,42 @@ const SignupPage = () => {
     setFormData((current) => ({ ...current, [field]: value }));
   };
 
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return "";
+    const today = new Date();
+    const born = new Date(`${birthDate}T00:00:00`);
+    let years = today.getFullYear() - born.getFullYear();
+    const monthDiff = today.getMonth() - born.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < born.getDate())) {
+      years -= 1;
+    }
+    return years;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Las contrasenas no coinciden");
+      setError("Las contraseñas no coinciden");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("La contrasena debe tener al menos 6 caracteres");
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]{3,24}$/.test(formData.username)) {
+      setError(
+        "El nombre de usuario debe tener entre 3 y 24 caracteres y solo puede usar letras, numeros o guion bajo"
+      );
+      return;
+    }
+
+    const calculatedAge = calculateAge(formData.birthDate);
+    if (!formData.birthDate || calculatedAge < 13) {
+      setError("Debes ingresar una fecha de nacimiento valida y tener al menos 13 anos");
       return;
     }
 
@@ -60,7 +93,10 @@ const SignupPage = () => {
 
     try {
       await signup(formData.name, formData.email, formData.password, {
-        age: formData.age ? Number(formData.age) : undefined,
+        username: formData.username,
+        age: calculatedAge,
+        birthDate: formData.birthDate,
+        sex: formData.sex,
         city: formData.city,
         province: formData.province,
         country: formData.country,
@@ -70,7 +106,7 @@ const SignupPage = () => {
           : undefined,
         sustainabilityGoal: formData.sustainabilityGoal,
       });
-      navigate("/dashboard");
+      navigate("/terminos-y-condiciones");
     } catch (err) {
       setError(err.response?.data?.message || "Error al registrarse");
     } finally {
@@ -81,8 +117,8 @@ const SignupPage = () => {
   return (
     <div className="signup-page eco-aurora">
       <header className="signup-brand-wrap">
-        <Link to="/login" className="signup-brand animate-pop">
-          EH
+        <Link to="/login" className="signup-brand animate-pop" aria-label="Eco Huella">
+          <img src={ecoHuellaLogo} alt="" className="signup-brand-logo" />
         </Link>
       </header>
 
@@ -131,30 +167,73 @@ const SignupPage = () => {
 
             {error && <div className="signup-error">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="signup-form">
+            <form onSubmit={handleSubmit} className="signup-form" autoComplete="off">
               <div className="signup-grid">
-                {["name", "email", "age", "city", "province", "country"].map(
+                {["name", "username", "email", "birthDate", "age", "sex", "city", "province", "country"].map(
                   (field) => (
                     <label key={field} className="signup-field">
                       {fieldLabels[field]}
-                      <input
-                        type={
-                          field === "email"
-                            ? "email"
-                            : field === "age"
-                              ? "number"
-                              : "text"
-                        }
-                        min={field === "age" ? "13" : undefined}
-                        max={field === "age" ? "120" : undefined}
-                        value={formData[field]}
-                        onChange={(e) => handleChange(field, e.target.value)}
-                        className={inputClasses}
-                        placeholder="Completar campo"
-                        required={["name", "email", "city", "province"].includes(
-                          field
-                        )}
-                      />
+                      {field === "sex" ? (
+                        <select
+                          name="signup_sex"
+                          value={formData.sex}
+                          onChange={(e) => handleChange("sex", e.target.value)}
+                          className={inputClasses}
+                          required
+                        >
+                          <option value="">Elegir sexo</option>
+                          <option value="female">Mujer</option>
+                          <option value="male">Hombre</option>
+                          <option value="prefer_not_say">Prefiero no decir</option>
+                        </select>
+                      ) : (
+                        <input
+                          type={
+                            field === "email"
+                              ? "email"
+                              : field === "birthDate"
+                                ? "date"
+                              : field === "age"
+                                ? "number"
+                                : "text"
+                          }
+                          name={`signup_${field}`}
+                          autoComplete={
+                            field === "email"
+                              ? "off"
+                              : field === "username"
+                                ? "off"
+                                : field === "name"
+                                  ? "name"
+                                  : "off"
+                          }
+                          min={field === "age" ? "13" : undefined}
+                          max={field === "age" ? "120" : undefined}
+                          value={
+                            field === "age" && formData.birthDate
+                              ? calculateAge(formData.birthDate)
+                              : formData[field]
+                          }
+                          onChange={(e) => {
+                            if (field === "birthDate") {
+                              const nextAge = calculateAge(e.target.value);
+                              setFormData((current) => ({
+                                ...current,
+                                birthDate: e.target.value,
+                                age: nextAge || "",
+                              }));
+                              return;
+                            }
+                            handleChange(field, e.target.value);
+                          }}
+                          className={inputClasses}
+                          placeholder="Completar campo"
+                          disabled={field === "age" && Boolean(formData.birthDate)}
+                          required={["name", "username", "email", "birthDate", "city", "province"].includes(
+                            field
+                          )}
+                        />
+                      )}
                     </label>
                   )
                 )}
@@ -226,14 +305,37 @@ const SignupPage = () => {
                 {["password", "confirmPassword"].map((field) => (
                   <label key={field} className="signup-field">
                     {fieldLabels[field]}
-                    <input
-                      type="password"
-                      value={formData[field]}
-                      onChange={(e) => handleChange(field, e.target.value)}
-                      className={inputClasses}
-                      placeholder="Minimo 6 caracteres"
-                      required
-                    />
+                    <span className="signup-password-input">
+                      <input
+                        type={showSignupPassword ? "text" : "password"}
+                        name={`signup_${field}`}
+                        value={formData[field]}
+                        onChange={(e) => handleChange(field, e.target.value)}
+                        className={inputClasses}
+                        placeholder="Mínimo 6 caracteres"
+                        autoComplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="signup-password-toggle"
+                        onClick={() => setShowSignupPassword((current) => !current)}
+                        aria-label={
+                          showSignupPassword
+                            ? "Ocultar contraseña"
+                            : "Mostrar contraseña"
+                        }
+                        title={
+                          showSignupPassword
+                            ? "Ocultar contraseña"
+                            : "Mostrar contraseña"
+                        }
+                      >
+                        <span className="material-symbols-outlined">
+                          {showSignupPassword ? "visibility" : "visibility_off"}
+                        </span>
+                      </button>
+                    </span>
                   </label>
                 ))}
               </div>

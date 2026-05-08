@@ -7,6 +7,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Por favor proporciona tu nombre"],
     },
+    username: {
+      type: String,
+      required: [true, "Por favor proporciona tu nombre de usuario"],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      minlength: [3, "El nombre de usuario debe tener al menos 3 caracteres"],
+      maxlength: [24, "El nombre de usuario no puede superar 24 caracteres"],
+      match: [
+        /^[a-zA-Z0-9_]+$/,
+        "El nombre de usuario solo puede incluir letras, numeros y guion bajo",
+      ],
+    },
     email: {
       type: String,
       required: [true, "Por favor proporciona tu email"],
@@ -27,6 +40,14 @@ const userSchema = new mongoose.Schema(
       type: Number,
       min: 13,
       max: 120,
+    },
+    birthDate: {
+      type: Date,
+    },
+    sex: {
+      type: String,
+      enum: ["female", "male", "prefer_not_say", ""],
+      default: "",
     },
     city: {
       type: String,
@@ -54,6 +75,28 @@ const userSchema = new mongoose.Schema(
     sustainabilityGoal: {
       type: String,
       trim: true,
+    },
+    avatarUrl: {
+      type: String,
+      default: "",
+    },
+    avatarZoom: {
+      type: Number,
+      min: 1,
+      max: 3,
+      default: 1,
+    },
+    avatarOffsetX: {
+      type: Number,
+      min: -50,
+      max: 50,
+      default: 0,
+    },
+    avatarOffsetY: {
+      type: Number,
+      min: -50,
+      max: 50,
+      default: 0,
     },
     resetPasswordToken: {
       type: String,

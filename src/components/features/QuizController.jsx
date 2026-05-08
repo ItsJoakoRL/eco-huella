@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QuestionCard from './QuestionCard';
 import quizData from '../../data/questions.json';
+import { useAuth } from '../../context/AuthContext';
+import { clearLegacyQuizAnswers, saveQuizAttempt } from '../../utils/quizStorage';
 
 // Aplanamos el JSON para poder navegar pregunta a pregunta fácilmente
 const allQuestions = quizData.modules.flatMap(module => 
@@ -13,6 +15,7 @@ const allQuestions = quizData.modules.flatMap(module =>
 
 export default function QuizController({ onFinish, onCancel }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { 'h_personas': '2 personas', ... }
 
@@ -31,7 +34,8 @@ export default function QuizController({ onFinish, onCancel }) {
       setCurrentIndex(currentIndex + 1);
     } else {
       // Fin del cuestionario, enviamos los datos al Dashboard
-      localStorage.setItem('quizAnswers', JSON.stringify(answers));
+      saveQuizAttempt(user, answers);
+      clearLegacyQuizAnswers();
       if (onFinish) {
         onFinish(answers);
         return;

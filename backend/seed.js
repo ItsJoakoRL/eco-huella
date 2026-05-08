@@ -20,10 +20,13 @@ const seedDatabase = async () => {
     // Create admin user
     const admin = await User.create({
       name: "Admin Eco-Huella",
+      username: "admin",
       email: "admin@eco-huella.com",
       password: "admin123456",
       role: "admin",
       age: 34,
+      birthDate: "1991-01-01",
+      sex: "prefer_not_say",
       city: "Mendoza",
       province: "Mendoza",
       country: "Argentina",
@@ -36,10 +39,13 @@ const seedDatabase = async () => {
     // Create test user
     const user = await User.create({
       name: "Usuario Test",
+      username: "usuario_test",
       email: "user@eco-huella.com",
       password: "user123456",
       role: "user",
       age: 24,
+      birthDate: "2001-01-01",
+      sex: "male",
       city: "San Rafael",
       province: "Mendoza",
       country: "Argentina",

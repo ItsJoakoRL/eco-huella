@@ -1,0 +1,5 @@
+Guarda la imagen original del logo en esta carpeta con este nombre exacto:
+
+eco-huella-logo.png
+
+La app ya esta configurada para usar public/eco-huella-logo.png en login y registro.

@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Eco Huella</title>
+  <defs>
+    <linearGradient id="footGradient" x1="30" y1="12" x2="90" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f7ffe2" />
+      <stop offset="0.48" stop-color="#dff5a7" />
+      <stop offset="1" stop-color="#ffffff" />
+    </linearGradient>
+    <linearGradient id="bandGradient" x1="35" y1="91" x2="103" y2="47" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#072f1d" />
+      <stop offset="1" stop-color="#13783a" />
+    </linearGradient>
+    <linearGradient id="leafGradient" x1="83" y1="43" x2="115" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b9f23d" />
+      <stop offset="1" stop-color="#48b21f" />
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#063d22" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <path
+      d="M45.4 116.2c-12.9-16.4-20.7-43.5-18.7-65.1 1.6-17.6 8.8-32.6 19.5-38.3 5.6-3 11.6.6 12 7 .7 7.7 1.8 17.8 7.2 18.2 5.1.4 6.2-5.4 5.5-13.1-.6-6.8 2.7-11.4 8.5-11.3 6.1.1 9.1 5.2 8.7 12.6-.5 7.8 1.5 12 6.4 12 4.5 0 6.5-4.3 7.3-10.1.9-6.8 5.7-9.8 10.5-6.7 6.1 3.9 7.3 13.4 4.9 24.1-2.7 12.1-9 22.5-16.3 33.6-7.7 11.8-12.5 23.2-24.1 31.3-11.5 8.1-24.3 14.8-31.4 5.8Z"
+      fill="url(#footGradient)"
+      stroke="#07562a"
+      stroke-width="6.2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <path
+      d="M45.7 18.7c7.7 13.2 10.3 30.3 18.2 45.1 8.2 15.4 13.9 30.2 8.4 47.2"
+      fill="none"
+      stroke="#07562a"
+      stroke-width="3"
+      stroke-linecap="round"
+      opacity="0.22"
+    />
+
+    <path
+      d="M22.7 86.8c-5.4 7.1-7.2 15.1-5.2 23.7"
+      fill="none"
+      stroke="#279125"
+      stroke-width="5"
+      stroke-linecap="round"
+      opacity="0.92"
+    />
+    <path
+      d="M111.3 72.1c5.9 8.4 7.3 18.2 4 29.6"
+      fill="none"
+      stroke="#279125"
+      stroke-width="5"
+      stroke-linecap="round"
+      opacity="0.92"
+    />
+
+    <path
+      d="M83.5 57.6c10.6-12.2 22.4-15.4 34.6-10.4-4.6 14.1-16.8 20.2-35.7 17.6Z"
+      fill="url(#leafGradient)"
+      stroke="#07562a"
+      stroke-width="3.2"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M88.4 61.5c8.1-6.5 16.7-10.9 26.2-13.4"
+      fill="none"
+      stroke="#07562a"
+      stroke-width="2.3"
+      stroke-linecap="round"
+    />
+
+    <path
+      d="M20.3 93.7c15.4-4.6 26.9.7 32.4 15.1-15.9 5.8-27.5.4-32.4-15.1Z"
+      fill="url(#leafGradient)"
+      stroke="#07562a"
+      stroke-width="3.2"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M25.3 97.6c8.5 1.7 16.4 5.4 23.9 11"
+      fill="none"
+      stroke="#07562a"
+      stroke-width="2.3"
+      stroke-linecap="round"
+    />
+
+    <path
+      d="M31.8 76.4 97.5 43.2l9.8 17.5-67.5 37.2Z"
+      fill="url(#bandGradient)"
+      stroke="#04180f"
+      stroke-width="3.4"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M37.4 96.1 103.1 58.2l9 15.7-67.2 40.9Z"
+      fill="url(#bandGradient)"
+      stroke="#04180f"
+      stroke-width="3.4"
+      stroke-linejoin="round"
+    />
+
+    <text
+      x="57"
+      y="75"
+      fill="#98ef35"
+      font-family="Arial Black, Arial, Helvetica, sans-serif"
+      font-size="18"
+      font-weight="900"
+      letter-spacing="-0.8"
+      transform="rotate(-28 57 75)"
+    >ECO</text>
+    <text
+      x="49"
+      y="95"
+      fill="#98ef35"
+      font-family="Arial Black, Arial, Helvetica, sans-serif"
+      font-size="13"
+      font-weight="900"
+      letter-spacing="-0.6"
+      transform="rotate(-28 49 95)"
+    >HUELLA</text>
+  </g>
+</svg>
