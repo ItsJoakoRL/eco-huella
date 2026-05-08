@@ -55,12 +55,6 @@ const UserManagement = () => {
   }, []);
 
   const loadUsers = async () => {
-    const calculatedAge = calculateAge(formData.birthDate);
-    if (formData.birthDate && calculatedAge < 13) {
-      setError("La persona debe tener al menos 13 años.");
-      return;
-    }
-
     try {
       setLoading(true);
       const response = await usersAPI.getAll();
@@ -76,6 +70,13 @@ const UserManagement = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const calculatedAge = calculateAge(formData.birthDate);
+
+    if (formData.birthDate && calculatedAge < 13) {
+      setError("La persona debe tener al menos 13 años.");
+      return;
+    }
+
     if (formData.password && formData.password !== formData.confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
@@ -106,7 +107,7 @@ const UserManagement = () => {
       resetForm();
       loadUsers();
     } catch (err) {
-      setError("No se pudo guardar el usuario.");
+      setError(err.response?.data?.message || "No se pudo guardar el usuario.");
       console.error(err);
     }
   };
