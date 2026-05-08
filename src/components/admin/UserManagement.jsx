@@ -57,7 +57,7 @@ const UserManagement = () => {
   const loadUsers = async () => {
     const calculatedAge = calculateAge(formData.birthDate);
     if (formData.birthDate && calculatedAge < 13) {
-      setError("La persona debe tener al menos 13 anos.");
+      setError("La persona debe tener al menos 13 años.");
       return;
     }
 
@@ -520,7 +520,7 @@ const UserManagement = () => {
                         </span>
                         <span>
                           <span className="material-symbols-outlined">cake</span>
-                          {user.age ? `${user.age} anos` : "Edad pendiente"}
+                          {user.age ? `${user.age} años` : "Edad pendiente"}
                         </span>
                         <span>
                           <span className="material-symbols-outlined">wc</span>

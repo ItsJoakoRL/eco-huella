@@ -85,7 +85,7 @@ const SignupPage = () => {
 
     const calculatedAge = calculateAge(formData.birthDate);
     if (!formData.birthDate || calculatedAge < 13) {
-      setError("Debes ingresar una fecha de nacimiento valida y tener al menos 13 anos");
+      setError("Debes ingresar una fecha de nacimiento valida y tener al menos 13 años");
       return;
     }
 

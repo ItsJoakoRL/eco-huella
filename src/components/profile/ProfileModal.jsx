@@ -147,7 +147,7 @@ export default function ProfileModal({ isOpen, onClose }) {
 
     const calculatedAge = calculateAge(formData.birthDate);
     if (formData.birthDate && calculatedAge < 13) {
-      setError("La persona debe tener al menos 13 anos.");
+      setError("La persona debe tener al menos 13 años.");
       return;
     }
 
