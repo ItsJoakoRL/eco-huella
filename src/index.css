@@ -2539,9 +2539,10 @@ body {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 86% 5%, rgba(172, 234, 211, 0.58), transparent 34%),
-    radial-gradient(circle at 8% 22%, rgba(254, 179, 0, 0.16), transparent 28%),
-    linear-gradient(180deg, rgba(250, 249, 245, 0.75), rgba(241, 240, 235, 0.78));
+    linear-gradient(115deg, rgba(255, 255, 255, 0.82) 0 42%, rgba(221, 248, 238, 0.56) 42% 68%, rgba(250, 249, 245, 0.78) 68% 100%),
+    radial-gradient(circle at 82% 9%, rgba(172, 234, 211, 0.7), transparent 31%),
+    radial-gradient(circle at 10% 24%, rgba(254, 179, 0, 0.18), transparent 26%),
+    linear-gradient(180deg, rgba(250, 249, 245, 0.9), rgba(241, 240, 235, 0.86));
 }
 
 .admin-nature-layer {
@@ -2552,11 +2553,89 @@ body {
   overflow: hidden;
 }
 
+.admin-canopy {
+  position: absolute;
+  border-radius: 46% 54% 56% 44% / 58% 46% 54% 42%;
+  opacity: 0.82;
+  filter: blur(0.2px);
+}
+
+.admin-canopy::before,
+.admin-canopy::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  border: 1px solid rgba(41, 102, 84, 0.08);
+}
+
+.admin-canopy::before {
+  inset: 14%;
+}
+
+.admin-canopy::after {
+  inset: 28%;
+}
+
+.admin-canopy.canopy-left {
+  width: 360px;
+  height: 250px;
+  left: max(-120px, calc((100vw - 1180px) / 2 - 230px));
+  top: 34px;
+  background:
+    radial-gradient(circle at 32% 38%, rgba(172, 234, 211, 0.5), transparent 32%),
+    radial-gradient(circle at 68% 44%, rgba(41, 102, 84, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.1);
+  transform: rotate(-18deg);
+}
+
+.admin-canopy.canopy-right {
+  width: 520px;
+  height: 390px;
+  right: max(-180px, calc((100vw - 1180px) / 2 - 300px));
+  top: 8px;
+  background:
+    radial-gradient(circle at 36% 34%, rgba(172, 234, 211, 0.62), transparent 34%),
+    radial-gradient(circle at 70% 62%, rgba(245, 167, 32, 0.12), transparent 35%),
+    rgba(255, 255, 255, 0.12);
+  transform: rotate(13deg);
+}
+
+.admin-ground-line {
+  position: absolute;
+  left: max(0px, calc((100vw - 1180px) / 2 - 140px));
+  right: max(0px, calc((100vw - 1180px) / 2 - 140px));
+  bottom: 28px;
+  height: 170px;
+  border-top: 2px solid rgba(41, 102, 84, 0.07);
+  border-radius: 58% 42% 0 0 / 46% 52% 0 0;
+}
+
+.admin-ground-line::before,
+.admin-ground-line::after {
+  content: "";
+  position: absolute;
+  bottom: 42px;
+  width: 92px;
+  height: 42px;
+  border-radius: 100% 0 100% 0;
+  background: rgba(172, 234, 211, 0.24);
+}
+
+.admin-ground-line::before {
+  left: 9%;
+  transform: rotate(-18deg);
+}
+
+.admin-ground-line::after {
+  right: 12%;
+  transform: rotate(146deg);
+}
+
 .admin-leaf {
   position: absolute;
   display: grid;
   place-items: center;
-  color: rgba(41, 102, 84, 0.2);
+  color: rgba(41, 102, 84, 0.26);
   font-size: 44px;
   font-variation-settings: "FILL" 1;
   filter: drop-shadow(0 18px 26px rgba(41, 102, 84, 0.12));
@@ -2564,15 +2643,15 @@ body {
 }
 
 .admin-leaf.leaf-a {
-  top: 12%;
-  left: max(22px, calc((100vw - 1180px) / 2 - 92px));
+  top: 16%;
+  left: max(34px, calc((100vw - 1180px) / 2 - 78px));
   transform: rotate(-18deg);
 }
 
 .admin-leaf.leaf-b {
-  top: 24%;
-  right: max(28px, calc((100vw - 1180px) / 2 - 74px));
-  color: rgba(22, 123, 86, 0.18);
+  top: 22%;
+  right: max(52px, calc((100vw - 1180px) / 2 - 52px));
+  color: rgba(22, 123, 86, 0.24);
   font-size: 58px;
   animation-delay: -4s;
 }
@@ -3468,6 +3547,27 @@ body {
 
   .admin-vine {
     display: none;
+  }
+
+  .admin-canopy.canopy-left {
+    width: 210px;
+    height: 160px;
+    left: -96px;
+    top: 12px;
+  }
+
+  .admin-canopy.canopy-right {
+    width: 270px;
+    height: 210px;
+    right: -128px;
+    top: 18px;
+  }
+
+  .admin-ground-line {
+    left: -34px;
+    right: -34px;
+    bottom: 8px;
+    height: 120px;
   }
 
   .admin-section-head,

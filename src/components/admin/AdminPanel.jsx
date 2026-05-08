@@ -36,6 +36,9 @@ const AdminPanel = () => {
   return (
     <main className="admin-page">
       <div className="admin-nature-layer" aria-hidden="true">
+        <span className="admin-canopy canopy-left" />
+        <span className="admin-canopy canopy-right" />
+        <span className="admin-ground-line" />
         <span className="admin-leaf leaf-a material-symbols-outlined">eco</span>
         <span className="admin-leaf leaf-b material-symbols-outlined">
           psychiatry
