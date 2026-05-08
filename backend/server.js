@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
@@ -33,7 +34,11 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "Backend running", timestamp: new Date().toISOString() });
+  res.json({
+    status: "Backend running",
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.get(["/healthz", "/saludz"], (req, res) => {
