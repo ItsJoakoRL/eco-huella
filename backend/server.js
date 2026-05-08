@@ -28,8 +28,16 @@ app.use("/api/results", quizResultRoutes);
 app.use("/api/admin/users", userRoutes);
 
 // Health check
+app.get("/", (req, res) => {
+  res.json({ status: "EcoHuella API running", timestamp: new Date().toISOString() });
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "Backend running", timestamp: new Date().toISOString() });
+});
+
+app.get(["/healthz", "/saludz"], (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 // 404 handler
