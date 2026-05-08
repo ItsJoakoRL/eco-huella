@@ -1,4 +1,9 @@
 import nodemailer from "nodemailer";
+import dns from "node:dns";
+
+const lookupIPv4 = (hostname, options, callback) => {
+  dns.lookup(hostname, { ...options, family: 4 }, callback);
+};
 
 const getMailTransport = () => {
   const gmailUser = process.env.GMAIL_USER;
@@ -8,6 +13,7 @@ const getMailTransport = () => {
     greetingTimeout: 10000,
     socketTimeout: 15000,
     family: 4,
+    lookup: lookupIPv4,
   };
 
   if (gmailUser && gmailAppPassword) {
