@@ -3,10 +3,16 @@ import nodemailer from "nodemailer";
 const getMailTransport = () => {
   const gmailUser = process.env.GMAIL_USER;
   const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+  const timeoutOptions = {
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  };
 
   if (gmailUser && gmailAppPassword) {
     return nodemailer.createTransport({
       service: "gmail",
+      ...timeoutOptions,
       auth: {
         user: gmailUser,
         pass: gmailAppPassword,
@@ -19,6 +25,7 @@ const getMailTransport = () => {
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT || 587),
       secure: process.env.SMTP_SECURE === "true",
+      ...timeoutOptions,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,

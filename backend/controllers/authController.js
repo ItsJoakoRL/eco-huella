@@ -11,6 +11,14 @@ const generateToken = (userId, role) => {
   );
 };
 
+const withTimeout = (promise, milliseconds, message) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(message)), milliseconds)
+    ),
+  ]);
+
 export const signup = async (req, res) => {
   try {
     const {
@@ -324,11 +332,15 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
 
     await user.save({ validateBeforeSave: false });
-    await sendPasswordResetCode({
-      to: user.email,
-      name: user.name,
-      code: resetToken,
-    });
+    await withTimeout(
+      sendPasswordResetCode({
+        to: user.email,
+        name: user.name,
+        code: resetToken,
+      }),
+      15000,
+      "El correo tardo demasiado en enviarse. Revisa la configuracion de Gmail e intenta de nuevo."
+    );
 
     res.status(200).json({
       message:
@@ -345,11 +357,12 @@ export const forgotPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   try {
-    const { token, password } = req.body;
+    const { email, token, password } = req.body;
+    const registeredEmail = email?.trim().toLowerCase();
 
-    if (!token || !password) {
+    if (!registeredEmail || !token || !password) {
       return res.status(400).json({
-        message: "Por favor proporciona el cÃ³digo y la nueva contraseÃ±a",
+        message: "Por favor proporciona el correo, el codigo y la nueva contrasena",
       });
     }
 
@@ -361,6 +374,7 @@ export const resetPassword = async (req, res) => {
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     const user = await User.findOne({
+      email: registeredEmail,
       resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() },
     }).select("+password +resetPasswordToken +resetPasswordExpires");

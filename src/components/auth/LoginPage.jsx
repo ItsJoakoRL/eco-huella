@@ -84,6 +84,7 @@ const LoginPage = () => {
 
     try {
       await authAPI.resetPassword({
+        email: recoveryEmail,
         token: resetToken,
         password: newPassword,
       });

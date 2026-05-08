@@ -9,7 +9,9 @@ const connectDB = async () => {
       throw new Error("Falta configurar MONGODB_URI en las variables de entorno");
     }
 
-    const conn = await mongoose.connect(mongoUri);
+    const conn = await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 5000,
+    });
     console.log(`MongoDB Conectado: ${conn.connection.host}`);
     return conn;
   } catch (error) {
