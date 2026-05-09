@@ -44,15 +44,36 @@ export const updateUser = async (req, res) => {
       householdSize,
       sustainabilityGoal,
     } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedUsername = username?.trim().toLowerCase();
 
     const user = await User.findById(req.params.id).select("+password");
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
+    const duplicateChecks = [
+      ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+      ...(normalizedUsername ? [{ username: normalizedUsername }] : []),
+    ];
+    const duplicateUser = duplicateChecks.length
+      ? await User.findOne({
+          _id: { $ne: req.params.id },
+          $or: duplicateChecks,
+        })
+      : null;
+
+    if (duplicateUser) {
+      const message =
+        duplicateUser.email === normalizedEmail
+          ? "El email ya esta registrado"
+          : "El nombre de usuario ya esta registrado";
+      return res.status(400).json({ message });
+    }
+
     user.name = name;
-    user.username = username;
-    user.email = email;
+    user.username = normalizedUsername;
+    user.email = normalizedEmail;
     user.role = role;
     user.age = age;
     user.birthDate = birthDate;
@@ -81,6 +102,15 @@ export const updateUser = async (req, res) => {
       user,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0];
+      const message =
+        field === "email"
+          ? "El email ya esta registrado"
+          : "El nombre de usuario ya esta registrado";
+      return res.status(400).json({ message });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };
