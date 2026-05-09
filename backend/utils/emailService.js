@@ -6,17 +6,17 @@ const lookupIPv4 = (hostname, options, callback) => {
 };
 
 const buildPasswordResetEmail = ({ name, code }) => ({
-  subject: "Codigo de recuperacion de EcoHuella",
-  text: `Hola ${name || ""}. Tu codigo de recuperacion de EcoHuella es ${code}. Expira en 15 minutos.`,
+  subject: "Código de recuperación de EcoHuella",
+  text: `Hola ${name || ""}. Tu código de recuperación de EcoHuella es ${code}. Expira en 15 minutos.`,
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; color: #1f2937;">
       <h1 style="color: #16623f;">EcoHuella</h1>
-      <p>Hola ${name || ""}, recibimos una solicitud para cambiar tu contrasena.</p>
-      <p style="font-size: 14px; color: #4b5563;">Usa este codigo de 6 digitos:</p>
+      <p>Hola ${name || ""}, recibimos una solicitud para cambiar tu contraseña.</p>
+      <p style="font-size: 14px; color: #4b5563;">Usa este código de 6 dígitos:</p>
       <div style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #16623f; padding: 18px 22px; background: #d9f7eb; border-radius: 16px; text-align: center;">
         ${code}
       </div>
-      <p style="font-size: 14px; color: #4b5563;">Este codigo expira en 15 minutos. Si no pediste este cambio, puedes ignorar este correo.</p>
+      <p style="font-size: 14px; color: #4b5563;">Este código expira en 15 minutos. Si no pediste este cambio, puedes ignorar este correo.</p>
     </div>
   `,
 });
@@ -52,7 +52,7 @@ const sendWithResend = async ({ to, name, code }) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`No se pudo enviar el codigo por Resend: ${errorText}`);
+      throw new Error(`No se pudo enviar el código por Resend: ${errorText}`);
     }
 
     return true;
@@ -113,7 +113,7 @@ export const sendPasswordResetCode = async ({ to, name, code }) => {
 
   if (!transport) {
     throw new Error(
-      "El correo de EcoHuella no esta configurado para enviar codigos"
+      "El correo de EcoHuella no está configurado para enviar códigos"
     );
   }
 
