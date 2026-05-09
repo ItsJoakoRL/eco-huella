@@ -3640,25 +3640,201 @@ body {
 }
 
 @media (max-width: 760px) {
+  .app-shell {
+    min-height: 100dvh;
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(250, 249, 245, 0.92);
+    backdrop-filter: blur(18px);
+  }
+
   .app-nav {
     min-height: auto;
-    padding: 14px 0;
-    align-items: flex-start;
+    width: min(100%, calc(100vw - 24px));
+    padding: 10px 0;
+    align-items: center;
+    gap: 10px;
     flex-direction: column;
+  }
+
+  .brand-lockup {
+    width: 100%;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+
+  .brand-name {
+    font-size: 1.15rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.66rem;
   }
 
   .nav-actions {
     width: 100%;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
   }
 
   .user-chip {
+    grid-column: 1 / -1;
     width: 100%;
+    min-height: 44px;
+    justify-content: flex-start;
+  }
+
+  .nav-pill {
+    min-height: 44px;
+    justify-content: center;
+    padding: 0 10px;
+    font-size: 0.86rem;
+  }
+
+  .nav-pill .material-symbols-outlined {
+    font-size: 1.1rem;
   }
 
   .app-footer-inner {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-title {
+    font-size: clamp(2.75rem, 16vw, 4.1rem);
+    letter-spacing: -0.04em;
+  }
+
+  .dashboard-lead,
+  .admin-hero p,
+  .signup-aside p,
+  .login-aside p {
+    font-size: 0.98rem;
+    line-height: 1.58;
+  }
+
+  .admin-hero h1 {
+    font-size: clamp(2.45rem, 15vw, 4rem);
+  }
+
+  .admin-hero-card {
+    width: 100%;
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .admin-toolbar {
+    gap: 10px;
+  }
+
+  .admin-tabs {
+    border-radius: 24px;
+    padding: 6px;
+  }
+
+  .admin-tab {
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 0.84rem;
+  }
+
+  .admin-section-head h2 {
+    font-size: clamp(2rem, 12vw, 2.7rem);
+  }
+
+  .admin-table-card {
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .admin-table-wrap {
+    margin: -2px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table {
+    min-width: 760px;
+  }
+
+  .admin-user-details {
+    min-width: 220px;
+  }
+
+  .admin-form {
+    padding: 18px;
+  }
+
+  .admin-form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin: 12px -18px -18px;
+    padding: 12px 18px 14px;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(174, 173, 170, 0.28);
+  }
+
+  .admin-form-actions button {
+    width: 100%;
+  }
+
+  .profile-modal {
+    width: 100%;
+    min-height: 100dvh;
+    border-radius: 0;
+    padding: 18px;
+  }
+
+  .profile-modal-backdrop {
+    padding: 0;
+  }
+
+  .profile-title h2 {
+    font-size: 2.25rem;
+  }
+
+  .profile-toast {
+    position: static;
+    width: 100%;
+    border-radius: 18px;
+    margin-bottom: 12px;
+  }
+
+  .signup-page {
+    min-height: 100dvh;
+  }
+
+  .signup-card,
+  .login-card,
+  .terms-card {
+    border-radius: 24px;
+  }
+
+  .recovery-modal {
+    width: min(100%, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    border-radius: 24px;
+    padding: 22px;
+  }
+
+  .recovery-head {
+    align-items: flex-start;
   }
 }
 
