@@ -22,6 +22,7 @@ const quizResultSchema = new mongoose.Schema(
       percentage_vs_average: Number,
     },
     metadata: {
+      survey_type: String,
       household_size: Number,
       renewable_energy: Boolean,
       diet_type: String,

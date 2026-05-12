@@ -44,11 +44,26 @@ export const saveQuizResult = async (req, res) => {
       });
     }
 
+    const surveyType = metadata?.survey_type || answers?._surveyType || "ambiental";
+    const existingResult = await QuizResult.findOne({
+      userId: req.userId,
+      $or: [
+        { "metadata.survey_type": surveyType },
+        { "answers._surveyType": surveyType },
+      ],
+    });
+
+    if (existingResult) {
+      return res.status(409).json({
+        message: "Esta encuesta ya fue completada por este usuario",
+      });
+    }
+
     const quizResult = await QuizResult.create({
       userId: req.userId,
-      answers,
+      answers: { ...answers, _surveyType: surveyType },
       results,
-      metadata,
+      metadata: { ...metadata, survey_type: surveyType },
       completedAt: new Date(),
     });
 

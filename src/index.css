@@ -802,6 +802,21 @@ body {
   cursor: pointer;
 }
 
+.survey-track-card.completed {
+  cursor: default;
+  opacity: 0.72;
+  background: #f2f1ec;
+}
+
+.survey-track-card.completed:hover {
+  transform: none;
+}
+
+.survey-track-card.completed .survey-track-icon {
+  background: #d8f2c4;
+  color: #10330c;
+}
+
 .survey-track-icon {
   width: 58px;
   height: 58px;

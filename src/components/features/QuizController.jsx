@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import QuestionCard from "./QuestionCard";
 import quizData from "../../data/questions.json";
 import { getSurveyTrack } from "../../data/surveyTracks";
 import { useAuth } from "../../context/AuthContext";
-import { clearLegacyQuizAnswers, saveQuizAttempt } from "../../utils/quizStorage";
+import { clearLegacyQuizAnswers, getCompletedSurveyTypes, loadQuizHistory, saveQuizAttempt } from "../../utils/quizStorage";
 import { buildQuizResultPayload } from "../../utils/quizResults";
 import { quizResultsAPI } from "../../services/api";
 
@@ -23,6 +23,40 @@ export default function QuizController({ onFinish, onCancel }) {
     );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [isCheckingCompletion, setIsCheckingCompletion] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const redirectIfCompleted = async () => {
+      const localCompleted = getCompletedSurveyTypes(loadQuizHistory(user));
+      if (localCompleted.has(track.id)) {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+
+      try {
+        const response = await quizResultsAPI.getMyResults();
+        const serverCompleted = getCompletedSurveyTypes(response.data.results || []);
+        if (serverCompleted.has(track.id)) {
+          navigate("/dashboard", { replace: true });
+          return;
+        }
+      } catch (error) {
+        console.error("No se pudo verificar si la encuesta ya estaba completada:", error);
+      }
+
+      if (isMounted) {
+        setIsCheckingCompletion(false);
+      }
+    };
+
+    redirectIfCompleted();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate, track.id, user]);
 
   const currentQuestion = allQuestions[currentIndex];
   const currentAnswer = answers[currentQuestion.id];
@@ -63,6 +97,25 @@ export default function QuizController({ onFinish, onCancel }) {
       setCurrentIndex(currentIndex - 1);
     }
   };
+
+  if (isCheckingCompletion) {
+    return (
+      <section className="quiz-page">
+        <article className="quiz-card animate-pop">
+          <aside className="quiz-side">
+            <div className="quiz-module-icon">
+              <span className="material-symbols-outlined">progress_activity</span>
+            </div>
+            <div>
+              <span className="quiz-module">Verificando</span>
+              <h2>Revisando tus encuestas completadas...</h2>
+              <p>Cada recorrido se puede responder una sola vez.</p>
+            </div>
+          </aside>
+        </article>
+      </section>
+    );
+  }
 
   return (
     <QuestionCard

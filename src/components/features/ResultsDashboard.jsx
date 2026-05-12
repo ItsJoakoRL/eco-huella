@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { deleteQuizAttempt, loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
+import { loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
 import { calculateQuizResults } from "../../utils/quizResults";
 import { quizResultsAPI } from "../../services/api";
 
@@ -37,7 +37,6 @@ export default function ResultsDashboard({ answers, onRestart }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedAttempt, setSelectedAttempt] = useState(null);
-  const [attemptToDelete, setAttemptToDelete] = useState(null);
   const [storedAnswers, setStoredAnswers] = useState(() => loadQuizAnswers(user));
   const [localQuizHistory, setLocalQuizHistory] = useState(() => loadQuizHistory(user));
   const [serverQuizHistory, setServerQuizHistory] = useState([]);
@@ -164,35 +163,6 @@ export default function ResultsDashboard({ answers, onRestart }) {
 
     navigate("/encuestas");
   };
-  const handleDeleteAttempt = (event, attempt) => {
-    event.stopPropagation();
-    setAttemptToDelete(attempt);
-  };
-  const confirmDeleteAttempt = () => {
-    if (!attemptToDelete) return;
-
-    const removeDeletedAttempt = (history) => history.filter((attempt) => attempt.id !== attemptToDelete.id);
-
-    if (attemptToDelete.source === "server") {
-      quizResultsAPI.delete(attemptToDelete.id).catch((error) => {
-        console.error("No se pudo eliminar la encuesta guardada:", error);
-      });
-      setServerQuizHistory(removeDeletedAttempt);
-    } else {
-      const nextHistory = deleteQuizAttempt(user, attemptToDelete.id);
-      setLocalQuizHistory(nextHistory);
-    }
-
-    const nextHistory = removeDeletedAttempt(quizHistory);
-
-    if (selectedAttempt?.id === attemptToDelete.id) {
-      setSelectedAttempt(nextHistory[0] || null);
-    }
-
-    setStoredAnswers(nextHistory[0]?.answers || {});
-    setAttemptToDelete(null);
-  };
-
   if (!hasAnswers) {
     return (
       <div className="eco-aurora dashboard-page dashboard-empty-state">
@@ -378,14 +348,6 @@ export default function ResultsDashboard({ answers, onRestart }) {
                 <span className="survey-history-action">
                   {activeAttemptId === attempt.id ? "Viendo" : "Ver resultado"}
                 </span>
-                <button
-                  type="button"
-                  className="survey-history-delete"
-                  title="Eliminar encuesta"
-                  onClick={(event) => handleDeleteAttempt(event, attempt)}
-                >
-                  <span className="material-symbols-outlined">delete</span>
-                </button>
               </div>
             ))}
           </div>
@@ -417,24 +379,6 @@ export default function ResultsDashboard({ answers, onRestart }) {
           ))}
         </div>
       </section>
-
-      {attemptToDelete && (
-        <div className="confirm-modal-backdrop" role="dialog" aria-modal="true" aria-label="Eliminar cuestionario">
-          <div className="confirm-modal animate-pop">
-            <span className="confirm-modal-icon material-symbols-outlined">delete</span>
-            <h2>Seguro que quieres eliminar este cuestionario</h2>
-            <p>Esta accion quitara el resultado del historial de encuestas.</p>
-            <div className="confirm-modal-actions">
-              <button type="button" className="admin-secondary-button" onClick={() => setAttemptToDelete(null)}>
-                Cancelar
-              </button>
-              <button type="button" className="admin-primary-button danger" onClick={confirmDeleteAttempt}>
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

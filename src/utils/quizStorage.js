@@ -29,6 +29,12 @@ export const loadQuizHistory = (user) => {
   }
 };
 
+export const getAttemptSurveyType = (attempt) =>
+  attempt?.answers?._surveyType || attempt?.metadata?.survey_type || "ambiental";
+
+export const getCompletedSurveyTypes = (attempts = []) =>
+  new Set(attempts.map(getAttemptSurveyType));
+
 export const saveQuizAttempt = (user, answers) => {
   const nextAttempt = {
     id: `${Date.now()}`,
