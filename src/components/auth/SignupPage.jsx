@@ -19,7 +19,7 @@ const fieldLabels = {
   uccuyoLevel: "Nivel UCCuyo",
   occupation: "Ocupacion",
   householdSize: "Personas en el hogar",
-  sustainabilityGoal: "Objetivo ambiental",
+  sustainabilityGoal: "¿Qué querés mejorar?",
   password: "Contraseña",
   confirmPassword: "Confirmar contraseña",
 };
@@ -303,16 +303,13 @@ const SignupPage = () => {
                       }
                       className={inputClasses}
                     >
-                      <option value="">Elegir objetivo</option>
-                      <option value="reduce_energy">
-                        Reducir consumo de energia
-                      </option>
-                      <option value="move_better">
-                        Moverme de forma mas sustentable
-                      </option>
-                      <option value="eat_better">Mejorar mi alimentacion</option>
+                      <option value="">Elegir una meta</option>
+                      <option value="learn">Aprender sobre mi impacto</option>
+                      <option value="save_water">Cuidar el agua</option>
+                      <option value="reduce_energy">Ahorrar energia</option>
+                      <option value="eat_better">Mejorar mis habitos de alimentacion</option>
                       <option value="waste_less">Generar menos residuos</option>
-                      <option value="learn">Aprender y medir mi impacto</option>
+                      <option value="move_better">Moverme de forma mas sustentable</option>
                     </select>
                   </label>
                 </div>

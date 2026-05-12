@@ -335,14 +335,15 @@ export default function ProfileModal({ isOpen, onClose }) {
             </label>
 
             <label>
-              Objetivo ambiental
+              ¿Qué querés mejorar?
               <select className="admin-input" value={formData.sustainabilityGoal} onChange={(event) => updateField("sustainabilityGoal", event.target.value)}>
                 <option value="">Sin definir</option>
-                <option value="reduce_energy">Reducir energia</option>
-                <option value="move_better">Movilidad sustentable</option>
-                <option value="eat_better">Mejorar alimentacion</option>
-                <option value="waste_less">Menos residuos</option>
-                <option value="learn">Aprender y medir impacto</option>
+                <option value="learn">Aprender sobre mi impacto</option>
+                <option value="save_water">Cuidar el agua</option>
+                <option value="reduce_energy">Ahorrar energia</option>
+                <option value="eat_better">Mejorar mis habitos de alimentacion</option>
+                <option value="waste_less">Generar menos residuos</option>
+                <option value="move_better">Moverme de forma mas sustentable</option>
               </select>
             </label>
 

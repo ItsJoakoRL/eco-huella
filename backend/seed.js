@@ -51,7 +51,7 @@ const seedDatabase = async () => {
       country: "Argentina",
       occupation: "Estudiante",
       householdSize: 3,
-      sustainabilityGoal: "reduce_energy",
+      sustainabilityGoal: "save_water",
     });
     console.log("✓ Usuario test creado:", user.email);
 
