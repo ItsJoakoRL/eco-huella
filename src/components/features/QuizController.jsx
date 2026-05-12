@@ -4,6 +4,8 @@ import QuestionCard from './QuestionCard';
 import quizData from '../../data/questions.json';
 import { useAuth } from '../../context/AuthContext';
 import { clearLegacyQuizAnswers, saveQuizAttempt } from '../../utils/quizStorage';
+import { buildQuizResultPayload } from '../../utils/quizResults';
+import { quizResultsAPI } from '../../services/api';
 
 // Aplanamos el JSON para poder navegar pregunta a pregunta fácilmente
 const allQuestions = quizData.modules.flatMap(module => 
@@ -29,12 +31,17 @@ export default function QuizController({ onFinish, onCancel }) {
     });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentIndex < allQuestions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
       // Fin del cuestionario, enviamos los datos al Dashboard
       saveQuizAttempt(user, answers);
+      try {
+        await quizResultsAPI.save(buildQuizResultPayload(answers));
+      } catch (error) {
+        console.error("No se pudo guardar el resultado en la cuenta:", error);
+      }
       clearLegacyQuizAnswers();
       if (onFinish) {
         onFinish(answers);

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import quizData from "../../data/questions.json";
 import { useAuth } from "../../context/AuthContext";
 import { deleteQuizAttempt, loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
+import { calculateQuizResults } from "../../utils/quizResults";
+import { quizResultsAPI } from "../../services/api";
 
 const formatAttemptDate = (dateValue) =>
   new Intl.DateTimeFormat("es-AR", {
@@ -16,19 +17,72 @@ const formatAttemptDate = (dateValue) =>
 const formatLiters = (value) =>
   new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(value);
 
+const normalizeServerAttempt = (result) => ({
+  id: result._id,
+  source: "server",
+  createdAt: result.completedAt || result.createdAt,
+  answers: result.answers || {},
+});
+
 export default function ResultsDashboard({ answers, onRestart }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedAttempt, setSelectedAttempt] = useState(null);
   const [attemptToDelete, setAttemptToDelete] = useState(null);
   const [storedAnswers, setStoredAnswers] = useState(() => loadQuizAnswers(user));
-  const [quizHistory, setQuizHistory] = useState(() => loadQuizHistory(user));
+  const [localQuizHistory, setLocalQuizHistory] = useState(() => loadQuizHistory(user));
+  const [serverQuizHistory, setServerQuizHistory] = useState([]);
 
   useEffect(() => {
     setStoredAnswers(loadQuizAnswers(user));
-    setQuizHistory(loadQuizHistory(user));
+    setLocalQuizHistory(loadQuizHistory(user));
+    setServerQuizHistory([]);
     setSelectedAttempt(null);
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let isMounted = true;
+
+    const loadServerResults = async () => {
+      try {
+        const response = await quizResultsAPI.getMyResults();
+        if (!isMounted) return;
+
+        const nextHistory = (response.data.results || []).map(normalizeServerAttempt);
+        setServerQuizHistory(nextHistory);
+        if (nextHistory[0]?.answers) {
+          setStoredAnswers(nextHistory[0].answers);
+        }
+      } catch (error) {
+        console.error("No se pudieron cargar las encuestas guardadas:", error);
+      }
+    };
+
+    loadServerResults();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  const quizHistory = useMemo(() => {
+    const serverAnswerKeys = new Set(
+      serverQuizHistory.map((attempt) => JSON.stringify(attempt.answers || {}))
+    );
+    const seen = new Set();
+    const localOnlyHistory = localQuizHistory.filter(
+      (attempt) => !serverAnswerKeys.has(JSON.stringify(attempt.answers || {}))
+    );
+
+    return [...serverQuizHistory, ...localOnlyHistory].filter((attempt) => {
+      const key = `${attempt.source || "local"}-${attempt.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [localQuizHistory, serverQuizHistory]);
 
   const answersData = useMemo(() => {
     if (answers) return answers;
@@ -40,65 +94,7 @@ export default function ResultsDashboard({ answers, onRestart }) {
   const activeAttemptId = selectedAttempt?.id || quizHistory[0]?.id;
 
   const results = useMemo(() => {
-    const getOption = (moduleId, questionId) => {
-      const q = quizData.modules.find((m) => m.id === moduleId)?.questions.find((item) => item.id === questionId);
-      if (!q || !answersData[questionId]) return null;
-      return q.options?.find((opt) => opt.label === answersData[questionId]) || null;
-    };
-
-    const getNumber = (questionId, defaultVal = 1) => Number(answersData[questionId]) || defaultVal;
-
-    const personas = getNumber("h_personas", 1);
-    const elecOpt = getOption("hogar", "h_electricidad");
-    const calOpt = getOption("hogar", "h_calefaccion");
-    const renOpt = getOption("hogar", "h_renovable");
-
-    let hogarKg = (((elecOpt?.value || 300) * 12 * (elecOpt?.factor || 0.35)) + (50 * 12 * (calOpt?.factor || 2.02))) / personas;
-    hogarKg = hogarKg * (renOpt?.impact_modifier || 1.0);
-
-    const transOpt = getOption("transporte", "t_medio_principal");
-    const kmSemana = getNumber("t_distancia_semanal", 50);
-    const vuelosOpt = getOption("transporte", "t_vuelos");
-    const ocupacionOpt = getOption("transporte", "t_ocupacion");
-
-    let transporteKg = (kmSemana * 52 * (transOpt?.factor || 0)) / (ocupacionOpt?.divisor || 1);
-    transporteKg += (vuelosOpt?.value || 0) * (vuelosOpt?.factor || 0);
-
-    const dietaOpt = getOption("alimentacion", "a_dieta");
-    const procOpt = getOption("alimentacion", "a_procedencia");
-    const despOpt = getOption("alimentacion", "a_desperdicio");
-
-    let comidaKg = (dietaOpt?.base_yearly_kg || 1500) + ((despOpt?.extra_kg_co2 || 0) * 52);
-    comidaKg = comidaKg * (procOpt?.impact_modifier || 1.0);
-
-    const recicOpt = getOption("residuos", "r_reciclaje");
-    const compOpt = getOption("residuos", "r_compras");
-    const repOpt = getOption("residuos", "r_reparacion");
-
-    let residuosKg = 300 + (compOpt?.extra_kg_co2 || 100);
-    residuosKg = residuosKg * (recicOpt?.impact_modifier || 1.0) * (repOpt?.impact_modifier || 1.0);
-
-    const lavarropasSemanal = getNumber("w_lavarropas", 0);
-    const riegoSemanal = getNumber("w_riego", 0);
-    const autoSemanal = getNumber("w_auto", 0);
-    const aguaLitros = (lavarropasSemanal * 70 + riegoSemanal * 100 + autoSemanal * 200) * 52;
-
-    const totalKg = hogarKg + transporteKg + comidaKg + residuosKg;
-    const totalTon = (totalKg / 1000).toFixed(1);
-    const diffAvg = (((totalTon - 4.7) / 4.7) * 100).toFixed(0);
-    const planetas = (totalTon / 1.5).toFixed(1);
-
-    return {
-      hogar: (hogarKg / 1000).toFixed(1),
-      transporte: (transporteKg / 1000).toFixed(1),
-      comida: (comidaKg / 1000).toFixed(1),
-      residuos: (residuosKg / 1000).toFixed(1),
-      total: totalTon,
-      diffAvg: Number(diffAvg),
-      planetas: Number(planetas),
-      aguaLitros,
-      aguaM3: (aguaLitros / 1000).toFixed(1),
-    };
+    return calculateQuizResults(answersData);
   }, [answersData]);
 
   const getPercent = (value) => `${((Number(value) / Number(results.total)) * 100).toFixed(1)}%`;
@@ -163,8 +159,19 @@ export default function ResultsDashboard({ answers, onRestart }) {
   const confirmDeleteAttempt = () => {
     if (!attemptToDelete) return;
 
-    const nextHistory = deleteQuizAttempt(user, attemptToDelete.id);
-    setQuizHistory(nextHistory);
+    const removeDeletedAttempt = (history) => history.filter((attempt) => attempt.id !== attemptToDelete.id);
+
+    if (attemptToDelete.source === "server") {
+      quizResultsAPI.delete(attemptToDelete.id).catch((error) => {
+        console.error("No se pudo eliminar la encuesta guardada:", error);
+      });
+      setServerQuizHistory(removeDeletedAttempt);
+    } else {
+      const nextHistory = deleteQuizAttempt(user, attemptToDelete.id);
+      setLocalQuizHistory(nextHistory);
+    }
+
+    const nextHistory = removeDeletedAttempt(quizHistory);
 
     if (selectedAttempt?.id === attemptToDelete.id) {
       setSelectedAttempt(nextHistory[0] || null);
