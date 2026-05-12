@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      min: 13,
+      min: 0,
       max: 120,
     },
     birthDate: {
@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "Argentina",
+    },
+    uccuyoLevel: {
+      type: String,
+      enum: ["jardin", "primario", "secundaria", "universidad", ""],
+      default: "",
     },
     occupation: {
       type: String,

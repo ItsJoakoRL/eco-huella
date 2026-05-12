@@ -32,6 +32,7 @@ export const signup = async (req, res) => {
       city,
       province,
       country,
+      uccuyoLevel,
       occupation,
       householdSize,
       sustainabilityGoal,
@@ -71,6 +72,7 @@ export const signup = async (req, res) => {
       city,
       province,
       country,
+      uccuyoLevel,
       occupation,
       householdSize,
       sustainabilityGoal,
@@ -96,6 +98,7 @@ export const signup = async (req, res) => {
         city: user.city,
         province: user.province,
         country: user.country,
+        uccuyoLevel: user.uccuyoLevel,
         occupation: user.occupation,
         householdSize: user.householdSize,
         sustainabilityGoal: user.sustainabilityGoal,
@@ -150,6 +153,7 @@ export const login = async (req, res) => {
         city: user.city,
         province: user.province,
         country: user.country,
+        uccuyoLevel: user.uccuyoLevel,
         occupation: user.occupation,
         householdSize: user.householdSize,
         sustainabilityGoal: user.sustainabilityGoal,
@@ -184,6 +188,7 @@ export const getProfile = async (req, res) => {
         city: user.city,
         province: user.province,
         country: user.country,
+        uccuyoLevel: user.uccuyoLevel,
         occupation: user.occupation,
         householdSize: user.householdSize,
         sustainabilityGoal: user.sustainabilityGoal,
@@ -211,6 +216,7 @@ export const updateProfile = async (req, res) => {
       city,
       province,
       country,
+      uccuyoLevel,
       occupation,
       householdSize,
       sustainabilityGoal,
@@ -262,6 +268,7 @@ export const updateProfile = async (req, res) => {
     user.city = city ?? user.city;
     user.province = province ?? user.province;
     user.country = country ?? user.country;
+    user.uccuyoLevel = uccuyoLevel ?? user.uccuyoLevel;
     user.occupation = occupation ?? user.occupation;
     user.householdSize = householdSize === "" ? undefined : householdSize ?? user.householdSize;
     user.sustainabilityGoal = sustainabilityGoal ?? user.sustainabilityGoal;
@@ -291,6 +298,7 @@ export const updateProfile = async (req, res) => {
         city: user.city,
         province: user.province,
         country: user.country,
+        uccuyoLevel: user.uccuyoLevel,
         occupation: user.occupation,
         householdSize: user.householdSize,
         sustainabilityGoal: user.sustainabilityGoal,

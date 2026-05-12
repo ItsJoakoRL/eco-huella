@@ -146,8 +146,8 @@ export default function ProfileModal({ isOpen, onClose }) {
     }
 
     const calculatedAge = calculateAge(formData.birthDate);
-    if (formData.birthDate && calculatedAge < 13) {
-      setError("La persona debe tener al menos 13 años.");
+    if (formData.birthDate && (calculatedAge < 0 || calculatedAge > 120)) {
+      setError("Ingresa una fecha de nacimiento valida.");
       return;
     }
 
@@ -296,7 +296,7 @@ export default function ProfileModal({ isOpen, onClose }) {
 
             <label>
               Edad
-              <input className="admin-input" type="number" min="13" max="120" value={formData.age} onChange={(event) => updateField("age", event.target.value)} disabled={Boolean(formData.birthDate)} />
+              <input className="admin-input" type="number" min="0" max="120" value={formData.age} onChange={(event) => updateField("age", event.target.value)} disabled={Boolean(formData.birthDate)} />
             </label>
 
             <label>

@@ -13,6 +13,9 @@ const formatAttemptDate = (dateValue) =>
     minute: "2-digit",
   }).format(new Date(dateValue));
 
+const formatLiters = (value) =>
+  new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(value);
+
 export default function ResultsDashboard({ answers, onRestart }) {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -75,6 +78,11 @@ export default function ResultsDashboard({ answers, onRestart }) {
     let residuosKg = 300 + (compOpt?.extra_kg_co2 || 100);
     residuosKg = residuosKg * (recicOpt?.impact_modifier || 1.0) * (repOpt?.impact_modifier || 1.0);
 
+    const lavarropasSemanal = getNumber("w_lavarropas", 0);
+    const riegoSemanal = getNumber("w_riego", 0);
+    const autoSemanal = getNumber("w_auto", 0);
+    const aguaLitros = (lavarropasSemanal * 70 + riegoSemanal * 100 + autoSemanal * 200) * 52;
+
     const totalKg = hogarKg + transporteKg + comidaKg + residuosKg;
     const totalTon = (totalKg / 1000).toFixed(1);
     const diffAvg = (((totalTon - 4.7) / 4.7) * 100).toFixed(0);
@@ -88,6 +96,8 @@ export default function ResultsDashboard({ answers, onRestart }) {
       total: totalTon,
       diffAvg: Number(diffAvg),
       planetas: Number(planetas),
+      aguaLitros,
+      aguaM3: (aguaLitros / 1000).toFixed(1),
     };
   }, [answersData]);
 
@@ -215,22 +225,40 @@ export default function ResultsDashboard({ answers, onRestart }) {
           </p>
         </div>
 
-        <div className="impact-card hover-lift animate-pop" style={{ animationDelay: "140ms" }}>
-          <p className="impact-label">Huella de carbono total</p>
-          <div className="impact-value">
-            <strong>{results.total}</strong>
-            <span>t CO2e</span>
-          </div>
-          <div className="impact-diff">
-            <div className="impact-diff-icon">
-              <span className="material-symbols-outlined">{results.diffAvg <= 0 ? "trending_down" : "trending_up"}</span>
+        <div className="impact-stack">
+          <div className="impact-card hover-lift animate-pop" style={{ animationDelay: "140ms" }}>
+            <p className="impact-label">Huella de carbono total</p>
+            <div className="impact-value">
+              <strong>{results.total}</strong>
+              <span>t CO2e</span>
             </div>
-            <div>
-              Estas un{" "}
-              <strong className={results.diffAvg <= 0 ? "text-secondary" : "text-red-700"}>
-                {Math.abs(results.diffAvg)}% {results.diffAvg <= 0 ? "por debajo" : "por encima"}
-              </strong>{" "}
-              de la media nacional.
+            <div className="impact-diff">
+              <div className="impact-diff-icon">
+                <span className="material-symbols-outlined">{results.diffAvg <= 0 ? "trending_down" : "trending_up"}</span>
+              </div>
+              <div>
+                Estas un{" "}
+                <strong className={results.diffAvg <= 0 ? "text-secondary" : "text-red-700"}>
+                  {Math.abs(results.diffAvg)}% {results.diffAvg <= 0 ? "por debajo" : "por encima"}
+                </strong>{" "}
+                de la media nacional.
+              </div>
+            </div>
+          </div>
+
+          <div className="impact-card impact-card-compact hover-lift animate-pop" style={{ animationDelay: "220ms" }}>
+            <p className="impact-label">Consumo de agua estimado</p>
+            <div className="impact-value">
+              <strong>{results.aguaM3}</strong>
+              <span>m3/año</span>
+            </div>
+            <div className="impact-diff">
+              <div className="impact-diff-icon water">
+                <span className="material-symbols-outlined">water_drop</span>
+              </div>
+              <div>
+                Aproximadamente <strong>{formatLiters(results.aguaLitros)} litros</strong> al año en lavarropas, riego y lavado de auto.
+              </div>
             </div>
           </div>
         </div>

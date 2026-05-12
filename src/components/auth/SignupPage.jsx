@@ -16,6 +16,7 @@ const fieldLabels = {
   city: "Ciudad",
   province: "Provincia",
   country: "Pais",
+  uccuyoLevel: "Nivel UCCuyo",
   occupation: "Ocupacion",
   householdSize: "Personas en el hogar",
   sustainabilityGoal: "Objetivo ambiental",
@@ -34,6 +35,7 @@ const SignupPage = () => {
     city: "",
     province: "",
     country: "Argentina",
+    uccuyoLevel: "",
     occupation: "",
     householdSize: "1",
     sustainabilityGoal: "",
@@ -84,8 +86,8 @@ const SignupPage = () => {
     }
 
     const calculatedAge = calculateAge(formData.birthDate);
-    if (!formData.birthDate || calculatedAge < 13) {
-      setError("Debes ingresar una fecha de nacimiento valida y tener al menos 13 años");
+    if (!formData.birthDate || calculatedAge < 0 || calculatedAge > 120) {
+      setError("Debes ingresar una fecha de nacimiento valida");
       return;
     }
 
@@ -100,6 +102,7 @@ const SignupPage = () => {
         city: formData.city,
         province: formData.province,
         country: formData.country,
+        uccuyoLevel: formData.uccuyoLevel,
         occupation: formData.occupation,
         householdSize: formData.householdSize
           ? Number(formData.householdSize)
@@ -169,7 +172,7 @@ const SignupPage = () => {
 
             <form onSubmit={handleSubmit} className="signup-form" autoComplete="off">
               <div className="signup-grid">
-                {["name", "username", "email", "birthDate", "age", "sex", "city", "province", "country"].map(
+                {["name", "username", "email", "birthDate", "age", "sex", "city", "province", "country", "uccuyoLevel"].map(
                   (field) => (
                     <label key={field} className="signup-field">
                       {fieldLabels[field]}
@@ -185,6 +188,20 @@ const SignupPage = () => {
                           <option value="female">Mujer</option>
                           <option value="male">Hombre</option>
                           <option value="prefer_not_say">Prefiero no decir</option>
+                        </select>
+                      ) : field === "uccuyoLevel" ? (
+                        <select
+                          name="signup_uccuyo_level"
+                          value={formData.uccuyoLevel}
+                          onChange={(e) => handleChange("uccuyoLevel", e.target.value)}
+                          className={inputClasses}
+                          required
+                        >
+                          <option value="">Elegir nivel</option>
+                          <option value="jardin">Jardín</option>
+                          <option value="primario">Primario</option>
+                          <option value="secundaria">Secundaria</option>
+                          <option value="universidad">Universidad</option>
                         </select>
                       ) : (
                         <input
@@ -207,7 +224,7 @@ const SignupPage = () => {
                                   ? "name"
                                   : "off"
                           }
-                          min={field === "age" ? "13" : undefined}
+                          min={field === "age" ? "0" : undefined}
                           max={field === "age" ? "120" : undefined}
                           value={
                             field === "age" && formData.birthDate

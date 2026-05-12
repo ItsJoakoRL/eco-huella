@@ -52,6 +52,34 @@
       ]
     },
     {
+      "id": "agua",
+      "label": "Agua",
+      "icon": "water_drop",
+      "questions": [
+        {
+          "id": "w_lavarropas",
+          "text": "¿Cuántas veces a la semana usás el lavarropas?",
+          "type": "number",
+          "description": "Contá cada lavado como una vez.",
+          "placeholder": "Ej: 3"
+        },
+        {
+          "id": "w_riego",
+          "text": "¿Cuántas veces a la semana regás las plantas?",
+          "type": "number",
+          "description": "Incluí riego de jardín, macetas o patio.",
+          "placeholder": "Ej: 2"
+        },
+        {
+          "id": "w_auto",
+          "text": "¿Cuántas veces a la semana lavás el auto?",
+          "type": "number",
+          "description": "Si no lavás auto, podés poner 0.",
+          "placeholder": "Ej: 1"
+        }
+      ]
+    },
+    {
       "id": "transporte",
       "label": "Transporte",
       "icon": "car",

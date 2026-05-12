@@ -1,10 +1,12 @@
 const moduleIcons = {
   Hogar: "home",
+  Agua: "water_drop",
   Transporte: "directions_car",
   Alimentacion: "restaurant",
   Alimentación: "restaurant",
   Consumo: "shopping_bag",
   Residuos: "recycling",
+  "Consumo y Residuos": "recycling",
 };
 
 export default function QuestionCard({

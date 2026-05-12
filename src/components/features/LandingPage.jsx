@@ -13,6 +13,7 @@ export default function LandingPage({ onStart }) {
 
   const methodItems = [
     { icon: "home", title: "Hogar", desc: "Consumo electrico, termico y eficiencia energetica." },
+    { icon: "water_drop", title: "Agua", desc: "Habitos semanales de lavado, riego y cuidado domestico." },
     { icon: "commute", title: "Movilidad", desc: "Desplazamientos diarios y viajes anuales." },
     { icon: "restaurant", title: "Alimentacion", desc: "Costo oculto de tu dieta y procedencia." },
     { icon: "recycling", title: "Residuos", desc: "Gestion de desechos y economia circular." },
@@ -111,7 +112,7 @@ export default function LandingPage({ onStart }) {
         <div className="landing-container">
           <div className="section-kicker center animate-rise">
             <h2>Un diagnostico de 3 minutos.</h2>
-            <p>14 preguntas simples basadas en tus habitos diarios.</p>
+            <p>17 preguntas simples basadas en tus habitos diarios.</p>
           </div>
 
           <div className="method-grid">

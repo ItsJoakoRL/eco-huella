@@ -810,6 +810,19 @@ body {
   box-shadow: 0 30px 80px rgba(46, 47, 45, 0.1);
 }
 
+.impact-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.impact-card-compact {
+  min-height: 210px;
+}
+
+.impact-card-compact .impact-value strong {
+  font-size: clamp(3.2rem, 5vw, 4.7rem);
+}
+
 .impact-card::after {
   content: "eco";
   position: absolute;
@@ -872,6 +885,11 @@ body {
   flex: 0 0 auto;
   background: #d8f2c4;
   color: #10330c;
+}
+
+.impact-diff-icon.water {
+  background: #d8edf8;
+  color: #12435f;
 }
 
 .dashboard-grid {
