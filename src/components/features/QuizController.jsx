@@ -11,7 +11,7 @@ import { quizResultsAPI } from "../../services/api";
 export default function QuizController({ onFinish, onCancel }) {
   const navigate = useNavigate();
   const { trackId = "ambiental" } = useParams();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const track = getSurveyTrack(trackId);
   const allQuestions = quizData.modules
     .filter((module) => track.modules.includes(module.id))
@@ -98,6 +98,14 @@ export default function QuizController({ onFinish, onCancel }) {
     }
   };
 
+  const handleCancel = onCancel || (() => {
+    if (isAuthenticated) {
+      navigate("/encuestas");
+    } else {
+      navigate("/");
+    }
+  });
+
   if (isCheckingCompletion) {
     return (
       <section className="quiz-page">
@@ -127,7 +135,7 @@ export default function QuizController({ onFinish, onCancel }) {
       onSelect={handleSelect}
       onNext={handleNext}
       onPrev={handlePrev}
-      onClose={onCancel}
+      onClose={handleCancel}
     />
   );
 }
