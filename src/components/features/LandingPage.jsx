@@ -8,7 +8,7 @@ export default function LandingPage({ onStart }) {
       return;
     }
 
-    navigate("/quiz");
+    navigate("/encuestas");
   };
 
   const methodItems = [
@@ -112,7 +112,7 @@ export default function LandingPage({ onStart }) {
         <div className="landing-container">
           <div className="section-kicker center animate-rise">
             <h2>Un diagnostico de 3 minutos.</h2>
-            <p>17 preguntas simples basadas en tus habitos diarios.</p>
+            <p>3 recorridos simples para medir ambiente, agua o desayuno.</p>
           </div>
 
           <div className="method-grid">

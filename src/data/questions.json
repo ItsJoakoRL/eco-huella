@@ -80,6 +80,55 @@
       ]
     },
     {
+      "id": "desayuno",
+      "label": "Desayuno",
+      "icon": "breakfast_dining",
+      "questions": [
+        {
+          "id": "d_bebida",
+          "text": "¿Qué tomás habitualmente en el desayuno?",
+          "type": "select",
+          "options": [
+            { "label": "Mate o té", "breakfast_kg_co2_week": 0.2, "icon": "local_cafe" },
+            { "label": "Café", "breakfast_kg_co2_week": 0.5, "icon": "coffee" },
+            { "label": "Leche chocolatada o yogur bebible", "breakfast_kg_co2_week": 1.1, "icon": "local_drink" },
+            { "label": "Gaseosa o jugo envasado", "breakfast_kg_co2_week": 1.4, "icon": "water_bottle" }
+          ]
+        },
+        {
+          "id": "d_comida",
+          "text": "¿Qué comés más seguido en el desayuno?",
+          "type": "select",
+          "options": [
+            { "label": "Fruta o cereal simple", "breakfast_kg_co2_week": 0.6, "icon": "nutrition" },
+            { "label": "Pan, tostadas o galletas", "breakfast_kg_co2_week": 0.9, "icon": "bakery_dining" },
+            { "label": "Facturas o productos dulces envasados", "breakfast_kg_co2_week": 1.5, "icon": "cookie" },
+            { "label": "Huevos, fiambre o queso", "breakfast_kg_co2_week": 2.2, "icon": "egg" }
+          ]
+        },
+        {
+          "id": "d_origen",
+          "text": "¿De dónde suele venir tu desayuno?",
+          "type": "select",
+          "options": [
+            { "label": "Preparado en casa", "impact_modifier": 0.9, "icon": "home" },
+            { "label": "Comprado en panadería o kiosco cercano", "impact_modifier": 1.0, "icon": "storefront" },
+            { "label": "Productos muy envasados del supermercado", "impact_modifier": 1.25, "icon": "inventory_2" }
+          ]
+        },
+        {
+          "id": "d_desperdicio",
+          "text": "¿Cuánta comida o bebida desperdiciás en el desayuno?",
+          "type": "select",
+          "options": [
+            { "label": "Casi nada", "extra_kg_co2": 0, "icon": "check_circle" },
+            { "label": "Un poco algunas veces", "extra_kg_co2": 12, "icon": "remove_circle" },
+            { "label": "Bastante seguido", "extra_kg_co2": 35, "icon": "delete" }
+          ]
+        }
+      ]
+    },
+    {
       "id": "transporte",
       "label": "Transporte",
       "icon": "car",

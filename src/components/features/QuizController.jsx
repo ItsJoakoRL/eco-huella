@@ -1,25 +1,28 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import QuestionCard from './QuestionCard';
-import quizData from '../../data/questions.json';
-import { useAuth } from '../../context/AuthContext';
-import { clearLegacyQuizAnswers, saveQuizAttempt } from '../../utils/quizStorage';
-import { buildQuizResultPayload } from '../../utils/quizResults';
-import { quizResultsAPI } from '../../services/api';
-
-// Aplanamos el JSON para poder navegar pregunta a pregunta fácilmente
-const allQuestions = quizData.modules.flatMap(module => 
-  module.questions.map(question => ({
-    ...question,
-    moduleLabel: module.label
-  }))
-);
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import QuestionCard from "./QuestionCard";
+import quizData from "../../data/questions.json";
+import { getSurveyTrack } from "../../data/surveyTracks";
+import { useAuth } from "../../context/AuthContext";
+import { clearLegacyQuizAnswers, saveQuizAttempt } from "../../utils/quizStorage";
+import { buildQuizResultPayload } from "../../utils/quizResults";
+import { quizResultsAPI } from "../../services/api";
 
 export default function QuizController({ onFinish, onCancel }) {
   const navigate = useNavigate();
+  const { trackId = "ambiental" } = useParams();
   const { user } = useAuth();
+  const track = getSurveyTrack(trackId);
+  const allQuestions = quizData.modules
+    .filter((module) => track.modules.includes(module.id))
+    .flatMap((module) =>
+      module.questions.map((question) => ({
+        ...question,
+        moduleLabel: module.label,
+      }))
+    );
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState({}); // { 'h_personas': '2 personas', ... }
+  const [answers, setAnswers] = useState({});
 
   const currentQuestion = allQuestions[currentIndex];
   const currentAnswer = answers[currentQuestion.id];
@@ -27,29 +30,32 @@ export default function QuizController({ onFinish, onCancel }) {
   const handleSelect = (value) => {
     setAnswers({
       ...answers,
-      [currentQuestion.id]: value
+      [currentQuestion.id]: value,
     });
   };
 
   const handleNext = async () => {
     if (currentIndex < allQuestions.length - 1) {
       setCurrentIndex(currentIndex + 1);
-    } else {
-      // Fin del cuestionario, enviamos los datos al Dashboard
-      saveQuizAttempt(user, answers);
-      try {
-        await quizResultsAPI.save(buildQuizResultPayload(answers));
-      } catch (error) {
-        console.error("No se pudo guardar el resultado en la cuenta:", error);
-      }
-      clearLegacyQuizAnswers();
-      if (onFinish) {
-        onFinish(answers);
-        return;
-      }
-
-      navigate('/dashboard');
+      return;
     }
+
+    const answersWithTrack = { ...answers, _surveyType: track.id };
+    saveQuizAttempt(user, answersWithTrack);
+
+    try {
+      await quizResultsAPI.save(buildQuizResultPayload(answers, track.id));
+    } catch (error) {
+      console.error("No se pudo guardar el resultado en la cuenta:", error);
+    }
+
+    clearLegacyQuizAnswers();
+    if (onFinish) {
+      onFinish(answersWithTrack);
+      return;
+    }
+
+    navigate("/dashboard");
   };
 
   const handlePrev = () => {

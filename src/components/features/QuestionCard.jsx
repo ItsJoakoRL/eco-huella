@@ -1,6 +1,7 @@
 const moduleIcons = {
   Hogar: "home",
   Agua: "water_drop",
+  Desayuno: "breakfast_dining",
   Transporte: "directions_car",
   Alimentacion: "restaurant",
   Alimentación: "restaurant",

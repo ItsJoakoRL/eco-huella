@@ -9,6 +9,7 @@ import TermsAndConditionsPage from "./components/legal/TermsAndConditionsPage";
 import LandingPage from "./components/features/LandingPage";
 import QuizController from "./components/features/QuizController";
 import ResultsDashboard from "./components/features/ResultsDashboard";
+import SurveySelector from "./components/features/SurveySelector";
 import AdminPanel from "./components/admin/AdminPanel";
 import Layout from "./components/layout/Layout";
 
@@ -40,7 +41,18 @@ export default function App() {
           />
 
           <Route
-            path="/quiz"
+            path="/encuestas"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SurveySelector />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/quiz/:trackId"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -49,6 +61,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/quiz" element={<Navigate to="/encuestas" replace />} />
 
           <Route
             path="/dashboard"

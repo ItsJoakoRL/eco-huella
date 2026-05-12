@@ -21,8 +21,17 @@ const normalizeServerAttempt = (result) => ({
   id: result._id,
   source: "server",
   createdAt: result.completedAt || result.createdAt,
-  answers: result.answers || {},
+  answers: {
+    ...(result.answers || {}),
+    _surveyType: result.metadata?.survey_type || result.answers?._surveyType || "ambiental",
+  },
 });
+
+const surveyTypeLabels = {
+  ambiental: "Encuesta ambiental",
+  agua: "Consumo de agua",
+  desayuno: "Desayuno",
+};
 
 export default function ResultsDashboard({ answers, onRestart }) {
   const navigate = useNavigate();
@@ -97,7 +106,10 @@ export default function ResultsDashboard({ answers, onRestart }) {
     return calculateQuizResults(answersData);
   }, [answersData]);
 
-  const getPercent = (value) => `${((Number(value) / Number(results.total)) * 100).toFixed(1)}%`;
+  const getPercent = (value) => {
+    const total = Number(results.total);
+    return total > 0 ? `${((Number(value) / total) * 100).toFixed(1)}%` : "0%";
+  };
 
   const highestCategory = useMemo(() => {
     const categories = [
@@ -140,7 +152,7 @@ export default function ResultsDashboard({ answers, onRestart }) {
   const categories = [
     { id: "hogar", icon: "home", label: "Hogar", color: "#feb300", val: results.hogar },
     { id: "transporte", icon: "commute", label: "Transporte", color: "#296654", val: results.transporte },
-    { id: "comida", icon: "restaurant", label: "Alimentacion", color: "#b9dda0", val: results.comida },
+    { id: "comida", icon: results.surveyType === "desayuno" ? "breakfast_dining" : "restaurant", label: results.surveyType === "desayuno" ? "Desayuno" : "Alimentacion", color: "#b9dda0", val: results.comida },
     { id: "residuos", icon: "delete_sweep", label: "Residuos", color: "#deddd8", val: results.residuos },
   ];
 
@@ -150,7 +162,7 @@ export default function ResultsDashboard({ answers, onRestart }) {
       return;
     }
 
-    navigate("/quiz");
+    navigate("/encuestas");
   };
   const handleDeleteAttempt = (event, attempt) => {
     event.stopPropagation();
@@ -359,9 +371,9 @@ export default function ResultsDashboard({ answers, onRestart }) {
                 <span className="survey-history-icon material-symbols-outlined">assignment_turned_in</span>
                 <span>
                   <strong>
-                    {index === 0 ? "Encuesta mas reciente" : `Encuesta ${quizHistory.length - index}`}
+                    {index === 0 ? "Mas reciente" : `Resultado ${quizHistory.length - index}`}
                   </strong>
-                  <small>{formatAttemptDate(attempt.createdAt)}</small>
+                  <small>{surveyTypeLabels[attempt.answers?._surveyType] || "Encuesta"} - {formatAttemptDate(attempt.createdAt)}</small>
                 </span>
                 <span className="survey-history-action">
                   {activeAttemptId === attempt.id ? "Viendo" : "Ver resultado"}
