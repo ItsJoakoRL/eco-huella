@@ -408,7 +408,6 @@ body {
   opacity: 0.42;
 }
 
-.app-shell > header,
 .app-shell > main,
 .app-shell > footer {
   position: relative;
@@ -459,7 +458,7 @@ body {
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 80;
   border-bottom: 1px solid rgba(174, 173, 170, 0.28);
   background: rgba(248, 246, 242, 0.74);
   backdrop-filter: blur(22px) saturate(1.08);
@@ -483,7 +482,13 @@ body {
   border: none;
   background: transparent;
   color: #296654;
-  cursor: default;
+  cursor: pointer;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.brand-lockup:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 12px 20px rgba(41, 102, 84, 0.14));
 }
 
 .brand-mark {
@@ -3980,7 +3985,7 @@ body {
   .app-header {
     position: sticky;
     top: 0;
-    z-index: 30;
+    z-index: 80;
     background: rgba(250, 249, 245, 0.92);
     backdrop-filter: blur(18px);
   }
@@ -4015,7 +4020,7 @@ body {
   .nav-actions {
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 

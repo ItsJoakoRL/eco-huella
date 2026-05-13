@@ -35,7 +35,7 @@ export default function Layout({ children }) {
       </div>
       <header className="app-header">
         <nav className="app-nav">
-          <div className="brand-lockup" aria-label="EcoHuella">
+          <button className="brand-lockup" type="button" onClick={() => navigate("/")} aria-label="Ir al inicio">
             <span className="brand-mark">
               <span className="material-symbols-outlined text-2xl">eco</span>
             </span>
@@ -43,7 +43,7 @@ export default function Layout({ children }) {
               <span className="brand-name">EcoHuella</span>
               <span className="brand-subtitle">Impacto sostenible</span>
             </span>
-          </div>
+          </button>
 
           {user && (
             <div className="nav-actions">
@@ -56,6 +56,16 @@ export default function Layout({ children }) {
                   )}
                 </span>
                 <span className="text-sm font-semibold text-on-surface-variant">{user.name}</span>
+              </button>
+
+              <button className="nav-pill" onClick={() => navigate("/")}>
+                <span className="material-symbols-outlined text-xl">home</span>
+                Inicio
+              </button>
+
+              <button className="nav-pill" onClick={() => navigate("/encuestas")}>
+                <span className="material-symbols-outlined text-xl">assignment</span>
+                Encuestas
               </button>
 
               <button className="nav-pill" onClick={() => navigate("/dashboard")}>
