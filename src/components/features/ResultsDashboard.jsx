@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
 import { calculateQuizResults } from "../../utils/quizResults";
 import { quizResultsAPI } from "../../services/api";
+import quizData from "../../data/questions.json";
 
 const formatAttemptDate = (dateValue) =>
   new Intl.DateTimeFormat("es-AR", {
@@ -17,10 +18,59 @@ const formatAttemptDate = (dateValue) =>
 const formatLiters = (value) =>
   new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(value);
 
+const answerKeys = new Set(
+  quizData.modules.flatMap((module) => module.questions.map((question) => question.id))
+);
+
+const hasMeaningfulAnswers = (answersData = {}) =>
+  Object.keys(answersData).some((key) => answerKeys.has(key) && answersData[key] !== "");
+
+const hasStoredResultValues = (storedResults = {}) =>
+  [
+    storedResults.housing_kg,
+    storedResults.transport_kg,
+    storedResults.food_kg,
+    storedResults.waste_kg,
+    storedResults.total_kg,
+    storedResults.total_tonnes,
+  ].some((value) => Number(value) > 0);
+
+const normalizeStoredResults = (storedResults = {}, answersData = {}) => {
+  const raw = {
+    hogarKg: Number(storedResults.housing_kg) || 0,
+    transporteKg: Number(storedResults.transport_kg) || 0,
+    comidaKg: Number(storedResults.food_kg) || 0,
+    residuosKg: Number(storedResults.waste_kg) || 0,
+    desayunoKg: 0,
+    totalKg: Number(storedResults.total_kg) || 0,
+  };
+  const aguaLitros =
+    ((Number(answersData.w_lavarropas) || 0) * 70 +
+      (Number(answersData.w_riego) || 0) * 100 +
+      (Number(answersData.w_auto) || 0) * 200) *
+    52;
+
+  return {
+    surveyType: answersData._surveyType || "ambiental",
+    hogar: (raw.hogarKg / 1000).toFixed(1),
+    transporte: (raw.transporteKg / 1000).toFixed(1),
+    comida: (raw.comidaKg / 1000).toFixed(1),
+    residuos: (raw.residuosKg / 1000).toFixed(1),
+    desayuno: (raw.desayunoKg / 1000).toFixed(2),
+    total: (Number(storedResults.total_tonnes) || raw.totalKg / 1000).toFixed(1),
+    diffAvg: Number(storedResults.percentage_vs_average) || 0,
+    planetas: Number(storedResults.planets_needed) || 0,
+    aguaLitros,
+    aguaM3: (aguaLitros / 1000).toFixed(1),
+    raw,
+  };
+};
+
 const normalizeServerAttempt = (result) => ({
   id: result._id,
   source: "server",
   createdAt: result.completedAt || result.createdAt,
+  results: result.results || null,
   answers: {
     ...(result.answers || {}),
     _surveyType: result.metadata?.survey_type || result.answers?._surveyType || "ambiental",
@@ -98,12 +148,18 @@ export default function ResultsDashboard({ answers, onRestart }) {
     return storedAnswers;
   }, [answers, selectedAttempt, storedAnswers]);
 
-  const hasAnswers = Object.keys(answersData).length > 0;
+  const activeAttempt = selectedAttempt || quizHistory[0] || null;
+  const hasAnswers =
+    hasMeaningfulAnswers(answersData) || hasStoredResultValues(activeAttempt?.results);
   const activeAttemptId = selectedAttempt?.id || quizHistory[0]?.id;
 
   const results = useMemo(() => {
+    if (!hasMeaningfulAnswers(answersData) && hasStoredResultValues(activeAttempt?.results)) {
+      return normalizeStoredResults(activeAttempt.results, answersData);
+    }
+
     return calculateQuizResults(answersData);
-  }, [answersData]);
+  }, [activeAttempt, answersData]);
 
   const getPercent = (value) => {
     const total = Number(results.total);
