@@ -11,6 +11,7 @@ const initialProfileForm = {
   city: "",
   province: "",
   country: "Argentina",
+  uccuyoLevel: "",
   occupation: "",
   householdSize: "1",
   sustainabilityGoal: "",
@@ -23,6 +24,14 @@ const initialProfileForm = {
 };
 
 const MAX_PROFILE_PHOTO_SIZE = 8 * 1024 * 1024;
+
+const uccuyoLevelOptions = [
+  { value: "", label: "Sin definir" },
+  { value: "jardin", label: "Jardin" },
+  { value: "primario", label: "Primario" },
+  { value: "secundaria", label: "Secundaria" },
+  { value: "universidad", label: "Universidad" },
+];
 
 const formatDateInput = (dateValue) => {
   if (!dateValue) return "";
@@ -61,6 +70,7 @@ export default function ProfileModal({ isOpen, onClose }) {
       city: user.city || "",
       province: user.province || "",
       country: user.country || "Argentina",
+      uccuyoLevel: user.uccuyoLevel || "",
       occupation: user.occupation || "",
       householdSize: user.householdSize || "1",
       sustainabilityGoal: user.sustainabilityGoal || "",
@@ -323,6 +333,17 @@ export default function ProfileModal({ isOpen, onClose }) {
             <label>
               Pais
               <input className="admin-input" value={formData.country} onChange={(event) => updateField("country", event.target.value)} />
+            </label>
+
+            <label>
+              Nivel UCCuyo
+              <select className="admin-input" value={formData.uccuyoLevel} onChange={(event) => updateField("uccuyoLevel", event.target.value)}>
+                {uccuyoLevelOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label>

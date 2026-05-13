@@ -40,6 +40,7 @@ export const updateUser = async (req, res) => {
       city,
       province,
       country,
+      uccuyoLevel,
       occupation,
       householdSize,
       sustainabilityGoal,
@@ -81,6 +82,7 @@ export const updateUser = async (req, res) => {
     user.city = city;
     user.province = province;
     user.country = country;
+    user.uccuyoLevel = uccuyoLevel;
     user.occupation = occupation;
     user.householdSize = householdSize;
     user.sustainabilityGoal = sustainabilityGoal;

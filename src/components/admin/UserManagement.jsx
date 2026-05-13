@@ -7,6 +7,21 @@ const roleLabels = {
   user: "Usuario",
 };
 
+const uccuyoLevelLabels = {
+  jardin: "Jardin",
+  primario: "Primario",
+  secundaria: "Secundaria",
+  universidad: "Universidad",
+};
+
+const uccuyoLevelOptions = [
+  { value: "", label: "Sin definir" },
+  { value: "jardin", label: "Jardin" },
+  { value: "primario", label: "Primario" },
+  { value: "secundaria", label: "Secundaria" },
+  { value: "universidad", label: "Universidad" },
+];
+
 const formatDateInput = (dateValue) => {
   if (!dateValue) return "";
   return new Date(dateValue).toISOString().slice(0, 10);
@@ -43,6 +58,7 @@ const UserManagement = () => {
     city: "",
     province: "",
     country: "Argentina",
+    uccuyoLevel: "",
     occupation: "",
     householdSize: "1",
     sustainabilityGoal: "",
@@ -155,6 +171,7 @@ const UserManagement = () => {
       city: user.city || "",
       province: user.province || "",
       country: user.country || "Argentina",
+      uccuyoLevel: user.uccuyoLevel || "",
       occupation: user.occupation || "",
       householdSize: user.householdSize || "1",
       sustainabilityGoal: user.sustainabilityGoal || "",
@@ -178,6 +195,7 @@ const UserManagement = () => {
       city: "",
       province: "",
       country: "Argentina",
+      uccuyoLevel: "",
       occupation: "",
       householdSize: "1",
       sustainabilityGoal: "",
@@ -348,6 +366,23 @@ const UserManagement = () => {
                 }
                 className="admin-input"
               />
+            </label>
+
+            <label>
+              Nivel UCCuyo
+              <select
+                value={formData.uccuyoLevel}
+                onChange={(event) =>
+                  setFormData({ ...formData, uccuyoLevel: event.target.value })
+                }
+                className="admin-input"
+              >
+                {uccuyoLevelOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label>
@@ -543,6 +578,12 @@ const UserManagement = () => {
                           <span>
                             <span className="material-symbols-outlined">work</span>
                             {user.occupation}
+                          </span>
+                        )}
+                        {user.uccuyoLevel && (
+                          <span>
+                            <span className="material-symbols-outlined">school</span>
+                            {uccuyoLevelLabels[user.uccuyoLevel] || user.uccuyoLevel}
                           </span>
                         )}
                       </div>
