@@ -20,6 +20,7 @@ export default function QuestionCard({
   onNext,
   onPrev,
   onClose,
+  closeHref = "/",
 }) {
   const progressPercentage = Math.round((currentStep / totalSteps) * 100);
   const moduleIcon = moduleIcons[moduleLabel] || "eco";
@@ -39,15 +40,19 @@ export default function QuestionCard({
           </p>
         </div>
 
-        <button
-          type="button"
+        <a
+          href={closeHref}
           className="quiz-close"
-          onClick={onClose}
+          onClick={(event) => {
+            if (!onClose) return;
+            event.preventDefault();
+            onClose();
+          }}
           aria-label="Cerrar cuestionario"
           title="Cerrar cuestionario"
         >
           <span className="material-symbols-outlined">close</span>
-        </button>
+        </a>
       </header>
 
       <article className="quiz-card animate-pop" key={question.id}>

@@ -60,6 +60,7 @@ export default function QuizController({ onFinish, onCancel }) {
 
   const currentQuestion = allQuestions[currentIndex];
   const currentAnswer = answers[currentQuestion.id];
+  const closeHref = isAuthenticated ? "/encuestas" : "/";
 
   const handleSelect = (value) => {
     setAnswers({
@@ -98,13 +99,19 @@ export default function QuizController({ onFinish, onCancel }) {
     }
   };
 
-  const handleCancel = onCancel || (() => {
-    if (isAuthenticated) {
-      navigate("/encuestas");
-    } else {
-      navigate("/");
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+      return;
     }
-  });
+
+    if (isAuthenticated) {
+      navigate("/encuestas", { replace: true });
+      return;
+    }
+
+    navigate("/", { replace: true });
+  };
 
   if (isCheckingCompletion) {
     return (
@@ -136,6 +143,7 @@ export default function QuizController({ onFinish, onCancel }) {
       onNext={handleNext}
       onPrev={handlePrev}
       onClose={handleCancel}
+      closeHref={closeHref}
     />
   );
 }
