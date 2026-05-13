@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import tasksData from '../../data/daily-tasks.json';
 
 export default function DailyDashboard({ onTaskClick, completedTasks = {} }) {

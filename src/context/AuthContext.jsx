@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { authAPI } from "../services/api";
 import { clearLegacyQuizAnswers, clearQuizAnswers } from "../utils/quizStorage";
 
@@ -39,13 +39,7 @@ export const AuthProvider = ({ children }) => {
   const [termsPending, setTermsPending] = useState(false);
 
   // Verificar si el usuario está autenticado al cargar
-  useEffect(() => {
-    if (token) {
-      checkAuth();
-    }
-  }, [token]);
-
-  const checkAuth = async () => {
+  async function checkAuth() {
     try {
       const response = await authAPI.getProfile();
       setUser(response.data.user);
@@ -115,7 +109,13 @@ export const AuthProvider = ({ children }) => {
     setTermsAccepted(false);
     setTermsPending(false);
     localStorage.removeItem("token");
-  };
+  }
+
+  useEffect(() => {
+    if (token) {
+      checkAuth();
+    }
+  }, [token]);
 
   const acceptTerms = () => {
     const userId = getUserId(user);

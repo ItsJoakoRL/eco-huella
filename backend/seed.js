@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import User from "./models/User.js";
 import Question from "./models/Question.js";
@@ -125,7 +124,7 @@ const seedDatabase = async () => {
     console.log(`✓ ${createdQuestions.length} preguntas creadas`);
 
     // Create emission parameters
-    const parameters = await EmissionParameter.create({
+    await EmissionParameter.create({
       category: "housing",
       parameters: {
         housing: {

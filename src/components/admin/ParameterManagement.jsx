@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { parametersAPI } from "../../services/api";
 
 const categories = ["housing", "transport", "food", "waste"];
@@ -24,11 +24,7 @@ const ParameterManagement = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({});
 
-  useEffect(() => {
-    loadParameters();
-  }, []);
-
-  const loadParameters = async () => {
+  async function loadParameters() {
     try {
       setLoading(true);
       const response = await parametersAPI.getAll();
@@ -42,7 +38,11 @@ const ParameterManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    loadParameters();
+  }, []);
 
   const handleEdit = (category) => {
     setEditingCategory(category);

@@ -152,7 +152,8 @@ export default function ProfileModal({ isOpen, onClose }) {
     }
 
     try {
-      const { confirmPassword, ...payload } = formData;
+      const payload = { ...formData };
+      delete payload.confirmPassword;
       await updateProfile({
         ...payload,
         age: payload.birthDate

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usersAPI } from "../../services/api";
 
@@ -50,11 +50,7 @@ const UserManagement = () => {
     confirmPassword: "",
   });
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
+  async function loadUsers() {
     try {
       setLoading(true);
       const response = await usersAPI.getAll();
@@ -66,7 +62,11 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -89,7 +89,8 @@ const UserManagement = () => {
 
     try {
       if (editingId) {
-        const { confirmPassword, ...payload } = formData;
+        const payload = { ...formData };
+        delete payload.confirmPassword;
         await usersAPI.update(editingId, {
           ...payload,
           password: payload.password || undefined,

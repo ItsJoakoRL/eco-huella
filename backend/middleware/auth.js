@@ -12,7 +12,7 @@ export const auth = (req, res, next) => {
     req.userId = decoded.userId;
     req.userRole = decoded.role;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ message: "Token inválido" });
   }
 };

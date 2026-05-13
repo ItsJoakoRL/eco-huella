@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import QuestionManagement from "./QuestionManagement";
 import UserManagement from "./UserManagement";
 import ParameterManagement from "./ParameterManagement";

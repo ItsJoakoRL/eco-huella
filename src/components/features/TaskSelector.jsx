@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function TaskSelector({ task, onSelect, onClose, currentSelection }) {
   if (!task) return null;
 
@@ -58,8 +56,6 @@ export default function TaskSelector({ task, onSelect, onClose, currentSelection
         <div>
           {task.options.map((option) => {
             const isSelected = currentSelection?.id === option.id;
-            const impactPercent = calculateImpactPercentage(option.emissions);
-
             return (
               <div
                 key={option.id}

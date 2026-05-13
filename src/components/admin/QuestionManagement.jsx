@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { questionsAPI } from "../../services/api";
 
 const moduleLabels = {
@@ -29,11 +29,7 @@ const QuestionManagement = () => {
     order: 1,
   });
 
-  useEffect(() => {
-    loadQuestions();
-  }, []);
-
-  const loadQuestions = async () => {
+  async function loadQuestions() {
     try {
       setLoading(true);
       const response = await questionsAPI.getAll({});
@@ -45,7 +41,11 @@ const QuestionManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    loadQuestions();
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

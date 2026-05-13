@@ -32,7 +32,7 @@ export const getQuestionById = async (req, res) => {
 
 export const createQuestion = async (req, res) => {
   try {
-    const { id, module, text, type, parameters, options } = req.body;
+    const { id, module, text, type } = req.body;
 
     if (!id || !module || !text || !type) {
       return res.status(400).json({
