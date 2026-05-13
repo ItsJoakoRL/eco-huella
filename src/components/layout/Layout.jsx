@@ -27,6 +27,12 @@ export default function Layout({ children }) {
 
   return (
     <div className="app-shell flex min-h-screen flex-col font-body text-on-surface">
+      <div className="app-nature-layer" aria-hidden="true">
+        <span className="nature-glyph glyph-leaf material-symbols-outlined">eco</span>
+        <span className="nature-glyph glyph-water material-symbols-outlined">water_drop</span>
+        <span className="nature-glyph glyph-park material-symbols-outlined">park</span>
+        <span className="nature-glyph glyph-bolt material-symbols-outlined">energy_savings_leaf</span>
+      </div>
       <header className="app-header">
         <nav className="app-nav">
           <div className="brand-lockup" aria-label="EcoHuella">
