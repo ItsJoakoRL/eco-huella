@@ -110,6 +110,11 @@ const LoginPage = () => {
       await login(email, password);
       navigate("/dashboard");
     } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Usuario/Correo O Contraseña Incorrectos");
+        return;
+      }
+
       setError(
         err.response?.data?.message ||
           "No se pudo conectar con el servidor. Verifica que el backend este encendido."

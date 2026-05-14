@@ -128,12 +128,16 @@ export const login = async (req, res) => {
       $or: [{ email: loginValue }, { username: loginValue }],
     }).select("+password");
     if (!user) {
-      return res.status(401).json({ message: "Credenciales invÃ¡lidas" });
+      return res
+        .status(401)
+        .json({ message: "Usuario/Correo O Contraseña Incorrectos" });
     }
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Credenciales invÃ¡lidas" });
+      return res
+        .status(401)
+        .json({ message: "Usuario/Correo O Contraseña Incorrectos" });
     }
 
     const token = generateToken(user._id, user.role);
