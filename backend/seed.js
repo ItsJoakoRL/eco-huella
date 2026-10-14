@@ -11,6 +11,15 @@ const seedDatabase = async () => {
     await connectDB();
     console.log("Conexión a MongoDB establecida");
 
+    // Protección: este script BORRA usuarios, preguntas y parámetros.
+    const existingUsers = await User.countDocuments();
+    if (existingUsers > 0 && !process.argv.includes("--force")) {
+      console.error(
+        `La base ya tiene ${existingUsers} usuario(s). Para borrarla y reinicializarla ejecuta: npm run seed -- --force`
+      );
+      process.exit(1);
+    }
+
     // Clear existing data
     await User.deleteMany({});
     await Question.deleteMany({});
@@ -21,7 +30,7 @@ const seedDatabase = async () => {
       name: "Admin Eco-Huella",
       username: "admin",
       email: "admin@eco-huella.com",
-      password: "admin123456",
+      password: process.env.SEED_ADMIN_PASSWORD || "admin123456",
       role: "admin",
       age: 34,
       birthDate: "1991-01-01",
@@ -40,7 +49,7 @@ const seedDatabase = async () => {
       name: "Usuario Test",
       username: "usuario_test",
       email: "user@eco-huella.com",
-      password: "user123456",
+      password: process.env.SEED_USER_PASSWORD || "user123456",
       role: "user",
       age: 24,
       birthDate: "2001-01-01",
