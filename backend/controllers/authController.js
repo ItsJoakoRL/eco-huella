@@ -2,11 +2,14 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendPasswordResetCode } from "../utils/emailService.js";
+import { getJwtSecret } from "../config/jwt.js";
+
+const MAX_RESET_ATTEMPTS = 5;
 
 const generateToken = (userId, role) => {
   return jwt.sign(
     { userId, role },
-    process.env.JWT_SECRET || "ecohuella-default-secret",
+    getJwtSecret(),
     { expiresIn: process.env.JWT_EXPIRE || "7d" }
   );
 };
@@ -44,7 +47,7 @@ export const signup = async (req, res) => {
 
     if (!name || !username || !email || !password) {
       return res.status(400).json({
-        message: "Por favor proporciona nombre, usuario, email y contraseÃ±a",
+        message: "Por favor proporciona nombre, usuario, email y contraseña",
       });
     }
 
@@ -56,8 +59,8 @@ export const signup = async (req, res) => {
     if (userExists) {
       const message =
         userExists.email === normalizedEmail
-          ? "El email ya estÃ¡ registrado"
-          : "El nombre de usuario ya estÃ¡ registrado";
+          ? "El email ya está registrado"
+          : "El nombre de usuario ya está registrado";
       return res.status(400).json({ message });
     }
 
@@ -119,7 +122,7 @@ export const login = async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Por favor proporciona usuario/email y contraseÃ±a",
+        message: "Por favor proporciona usuario/email y contraseña",
       });
     }
 
@@ -143,7 +146,7 @@ export const login = async (req, res) => {
     const token = generateToken(user._id, user.role);
 
     res.status(200).json({
-      message: "SesiÃ³n iniciada exitosamente",
+      message: "Sesión iniciada exitosamente",
       token,
       user: {
         id: user._id,
@@ -328,12 +331,16 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
+    const genericResponse = {
+      message:
+        "Si el correo está registrado, te enviamos un código de 6 dígitos. Expira en 15 minutos.",
+    };
+
     const user = await User.findOne({ email: registeredEmail });
 
+    // Misma respuesta exista o no la cuenta: no se revela qué correos están registrados.
     if (!user) {
-      return res.status(404).json({
-        message: "No existe una cuenta registrada con ese correo",
-      });
+      return res.status(200).json(genericResponse);
     }
 
     const resetToken = String(crypto.randomInt(100000, 1000000));
@@ -342,6 +349,7 @@ export const forgotPassword = async (req, res) => {
       .update(resetToken)
       .digest("hex");
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+    user.resetPasswordAttempts = 0;
 
     await user.save({ validateBeforeSave: false });
     await withTimeout(
@@ -354,10 +362,7 @@ export const forgotPassword = async (req, res) => {
       "El correo tardo demasiado en enviarse. Revisa la configuracion de Gmail e intenta de nuevo."
     );
 
-    res.status(200).json({
-      message:
-        "Te enviamos un código de 6 dígitos al correo registrado. Expira en 15 minutos.",
-    });
+    res.status(200).json(genericResponse);
   } catch (error) {
     res.status(500).json({
       message:
@@ -380,30 +385,48 @@ export const resetPassword = async (req, res) => {
 
     if (password.length < 6) {
       return res.status(400).json({
-        message: "La contraseÃ±a debe tener al menos 6 caracteres",
+        message: "La contraseña debe tener al menos 6 caracteres",
       });
     }
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const user = await User.findOne({
-      email: registeredEmail,
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() },
-    }).select("+password +resetPasswordToken +resetPasswordExpires");
+    const user = await User.findOne({ email: registeredEmail }).select(
+      "+password +resetPasswordToken +resetPasswordExpires +resetPasswordAttempts"
+    );
 
-    if (!user) {
-      return res.status(400).json({
-        message: "El cÃ³digo es invÃ¡lido o ya expirÃ³",
-      });
+    const invalidCode = () =>
+      res.status(400).json({ message: "El código es inválido o ya expiró" });
+
+    const isExpired =
+      !user?.resetPasswordToken ||
+      !user.resetPasswordExpires ||
+      new Date(user.resetPasswordExpires).getTime() < Date.now();
+
+    if (!user || isExpired) {
+      return invalidCode();
+    }
+
+    if (user.resetPasswordToken !== hashedToken) {
+      // Cada código incorrecto cuenta; al llegar al máximo el código se invalida
+      // y hay que pedir uno nuevo (frena la fuerza bruta sobre 6 dígitos).
+      user.resetPasswordAttempts = (user.resetPasswordAttempts || 0) + 1;
+      if (user.resetPasswordAttempts >= MAX_RESET_ATTEMPTS) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        user.resetPasswordAttempts = 0;
+      }
+      await user.save({ validateBeforeSave: false });
+      return invalidCode();
     }
 
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
+    user.resetPasswordAttempts = 0;
     await user.save();
 
     res.status(200).json({
-      message: "ContraseÃ±a actualizada correctamente",
+      message: "Contraseña actualizada correctamente",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

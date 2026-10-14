@@ -8,14 +8,29 @@ import questionRoutes from "./routes/questionRoutes.js";
 import parameterRoutes from "./routes/parameterRoutes.js";
 import quizResultRoutes from "./routes/quizResultRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import { getJwtSecret } from "./config/jwt.js";
 
 dotenv.config();
+
+// En producción el servidor no debe arrancar sin clave de firma de tokens.
+try {
+  getJwtSecret();
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+// CORS_ORIGIN admite uno o varios orígenes separados por coma. Si no se define,
+// se mantiene el comportamiento anterior (cualquier origen).
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+app.use(cors(allowedOrigins.length ? { origin: allowedOrigins } : undefined));
 app.use(express.json({ limit: "14mb" }));
 
 // Health check
