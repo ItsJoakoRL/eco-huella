@@ -71,14 +71,18 @@ const sections = [
 ];
 
 const TermsAndConditionsPage = () => {
-  const { isAuthenticated, termsPending, acceptTerms, rejectTerms } = useAuth();
+  const { isAuthenticated, checkingAuth, termsAccepted, acceptTerms, rejectTerms } = useAuth();
   const navigate = useNavigate();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!termsPending) {
+  if (checkingAuth) {
+    return null;
+  }
+
+  if (termsAccepted) {
     return <Navigate to="/dashboard" replace />;
   }
 

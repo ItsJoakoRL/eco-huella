@@ -2,13 +2,21 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
-  const { isAuthenticated, isAdmin, termsPending } = useAuth();
+  const { isAuthenticated, isAdmin, checkingAuth, termsAccepted, termsPending } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (termsPending) {
+  if (checkingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-primary" role="status" aria-label="Verificando sesión">
+        <span className="material-symbols-outlined animate-pulse-soft text-5xl">progress_activity</span>
+      </div>
+    );
+  }
+
+  if (termsPending || !termsAccepted) {
     return <Navigate to="/terminos-y-condiciones" replace />;
   }
 

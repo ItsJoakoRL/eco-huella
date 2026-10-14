@@ -34,6 +34,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
+  // true mientras se confirma con el servidor una sesión guardada: evita redirigir
+  // (a términos o al dashboard) antes de saber quién es el usuario.
+  const [checkingAuth, setCheckingAuth] = useState(() => Boolean(localStorage.getItem("token")));
   const [error, setError] = useState(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsPending, setTermsPending] = useState(false);
@@ -51,6 +54,8 @@ export const AuthProvider = ({ children }) => {
       setTermsAccepted(false);
       setTermsPending(false);
       localStorage.removeItem("token");
+    } finally {
+      setCheckingAuth(false);
     }
   };
 
@@ -86,7 +91,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await authAPI.login({
         email: email.trim(),
-        password: password.trim(),
+        password,
       });
       setToken(response.data.token);
       setUser(response.data.user);
@@ -163,6 +168,7 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     error,
+    checkingAuth,
     isAuthenticated: !!token,
     isAdmin: user?.role === "admin",
     termsAccepted,
