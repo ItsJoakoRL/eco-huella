@@ -96,7 +96,7 @@ export default function Layout({ children }) {
         />
       )}
 
-      <main className="flex-grow">{children}</main>
+      <main className="grow">{children}</main>
 
       <footer className="app-footer hidden md:block">
         <div className="app-footer-inner">
