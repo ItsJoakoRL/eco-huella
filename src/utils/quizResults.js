@@ -50,14 +50,20 @@ export const calculateQuizResults = (answersData = {}) => {
     const vuelosOpt = getOption("transporte", "t_vuelos");
     const ocupacionOpt = getOption("transporte", "t_ocupacion");
 
-    transporteKg = (kmSemana * 52 * (transOpt?.factor || 0)) / (ocupacionOpt?.divisor || 1);
+    // Para los autos, "factor" es kg de CO2 por LITRO de combustible y "liters_per_km"
+    // (consumo) lo lleva a kilómetros. Transporte público y bicicleta no tienen
+    // liters_per_km: su factor ya está expresado por km.
+    const kgPerKm = (transOpt?.factor || 0) * (transOpt?.liters_per_km ?? 1);
+    transporteKg = (kmSemana * 52 * kgPerKm) / (ocupacionOpt?.divisor || 1);
     transporteKg += (vuelosOpt?.value || 0) * (vuelosOpt?.factor || 0);
 
     const dietaOpt = getOption("alimentacion", "a_dieta");
     const procOpt = getOption("alimentacion", "a_procedencia");
     const despOpt = getOption("alimentacion", "a_desperdicio");
 
-    comidaKg = (dietaOpt?.base_yearly_kg || 1500) + ((despOpt?.extra_kg_co2 || 0) * 52);
+    // extra_kg_co2 del desperdicio ya es un valor anual (igual que en el recorrido
+    // de desayuno); multiplicarlo por 52 lo inflaba.
+    comidaKg = (dietaOpt?.base_yearly_kg || 1500) + (despOpt?.extra_kg_co2 || 0);
     comidaKg = comidaKg * (procOpt?.impact_modifier || 1.0);
 
     const recicOpt = getOption("residuos", "r_reciclaje");

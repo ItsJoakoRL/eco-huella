@@ -138,8 +138,8 @@
           "text": "¿Cuál es tu principal medio de transporte?",
           "type": "select",
           "options": [
-            { "label": "Auto (Nafta)", "factor": 2.31, "unit": "litro" },
-            { "label": "Auto (Diesel)", "factor": 2.68, "unit": "litro" },
+            { "label": "Auto (Nafta)", "factor": 2.31, "unit": "litro", "liters_per_km": 0.08 },
+            { "label": "Auto (Diesel)", "factor": 2.68, "unit": "litro", "liters_per_km": 0.07 },
             { "label": "Transporte Público (Colectivo/Tren)", "factor": 0.05, "unit": "km" },
             { "label": "Bicicleta / Pie", "factor": 0, "unit": "km" }
           ]
