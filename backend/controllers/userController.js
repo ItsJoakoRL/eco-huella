@@ -53,6 +53,12 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
+    if (req.params.id === req.userId && role && role !== "admin") {
+      return res.status(400).json({
+        message: "No puedes quitarte el rol de administrador a ti mismo",
+      });
+    }
+
     const duplicateChecks = [
       ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
       ...(normalizedUsername ? [{ username: normalizedUsername }] : []),
@@ -75,7 +81,7 @@ export const updateUser = async (req, res) => {
     user.name = name;
     user.username = normalizedUsername;
     user.email = normalizedEmail;
-    user.role = role;
+    user.role = role ?? user.role;
     user.age = age;
     user.birthDate = birthDate;
     user.sex = sex;
@@ -119,6 +125,12 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
+    if (req.params.id === req.userId) {
+      return res.status(400).json({
+        message: "No puedes eliminar tu propia cuenta desde el panel",
+      });
+    }
+
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
@@ -139,6 +151,12 @@ export const changeUserRole = async (req, res) => {
 
     if (!["user", "admin"].includes(role)) {
       return res.status(400).json({ message: "Rol inválido" });
+    }
+
+    if (req.params.id === req.userId && role !== "admin") {
+      return res.status(400).json({
+        message: "No puedes quitarte el rol de administrador a ti mismo",
+      });
     }
 
     const user = await User.findByIdAndUpdate(

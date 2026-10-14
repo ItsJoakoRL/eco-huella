@@ -89,9 +89,16 @@ export const updateQuizResult = async (req, res) => {
       return res.status(403).json({ message: "Acceso denegado" });
     }
 
+    // Solo se aceptan estos campos: evita reasignar el dueño (userId) o tocar _id.
+    const { answers, results, metadata } = req.body;
+    const updates = {};
+    if (answers !== undefined) updates.answers = answers;
+    if (results !== undefined) updates.results = results;
+    if (metadata !== undefined) updates.metadata = metadata;
+
     result = await QuizResult.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { $set: updates },
       { new: true, runValidators: true }
     );
 
