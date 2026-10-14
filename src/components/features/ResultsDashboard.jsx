@@ -204,6 +204,20 @@ export default function ResultsDashboard({ answers, onRestart }) {
   };
   const highestTextClass = categoryTextClasses[highestCategory.id] || "text-primary";
 
+  // La comparación con la media y los planetas solo tienen sentido para la huella
+  // completa (encuesta ambiental); agua y desayuno miden solo una parte.
+  const isFullFootprint = results.surveyType === "ambiental";
+  const hasEmissions = Number(results.raw?.totalKg) > 0;
+
+  // El agua solo se calcula en el recorrido "agua": si se está viendo otro
+  // resultado, se toma el de la encuesta de agua más reciente del historial.
+  const waterLitros = useMemo(() => {
+    if (Number(results.aguaLitros) > 0) return Number(results.aguaLitros);
+    const waterAttempt = quizHistory.find((attempt) => attempt.answers?._surveyType === "agua");
+    return waterAttempt ? Number(calculateQuizResults(waterAttempt.answers).aguaLitros) || 0 : 0;
+  }, [results, quizHistory]);
+  const hasWaterData = waterLitros > 0;
+
   const categories = [
     { id: "hogar", icon: "home", label: "Hogar", color: "#feb300", val: results.hogar },
     { id: "transporte", icon: "commute", label: "Transporte", color: "#296654", val: results.transporte },
@@ -272,29 +286,37 @@ export default function ResultsDashboard({ answers, onRestart }) {
 
         <div className="impact-stack">
           <div className="impact-card hover-lift animate-pop" style={{ animationDelay: "140ms" }}>
-            <p className="impact-label">Huella de carbono total</p>
+            <p className="impact-label">{isFullFootprint ? "Huella de carbono total" : "Huella de este recorrido"}</p>
             <div className="impact-value">
               <strong>{results.total}</strong>
               <span>t CO2e</span>
             </div>
             <div className="impact-diff">
               <div className="impact-diff-icon">
-                <span className="material-symbols-outlined">{results.diffAvg <= 0 ? "trending_down" : "trending_up"}</span>
+                <span className="material-symbols-outlined">
+                  {!isFullFootprint ? "info" : results.diffAvg <= 0 ? "trending_down" : "trending_up"}
+                </span>
               </div>
-              <div>
-                Estas un{" "}
-                <strong className={results.diffAvg <= 0 ? "text-secondary" : "text-red-700"}>
-                  {Math.abs(results.diffAvg)}% {results.diffAvg <= 0 ? "por debajo" : "por encima"}
-                </strong>{" "}
-                de la media nacional.
-              </div>
+              {isFullFootprint ? (
+                <div>
+                  Estas un{" "}
+                  <strong className={results.diffAvg <= 0 ? "text-secondary" : "text-red-700"}>
+                    {Math.abs(results.diffAvg)}% {results.diffAvg <= 0 ? "por debajo" : "por encima"}
+                  </strong>{" "}
+                  de la media nacional.
+                </div>
+              ) : (
+                <div>
+                  Este recorrido mide solo una parte de tu huella, por eso no se compara con la media nacional. Completa la encuesta ambiental para ver el total.
+                </div>
+              )}
             </div>
           </div>
 
           <div className="impact-card impact-card-compact hover-lift animate-pop" style={{ animationDelay: "220ms" }}>
             <p className="impact-label">Consumo de agua estimado</p>
             <div className="impact-value">
-              <strong>{results.aguaM3}</strong>
+              <strong>{hasWaterData ? (waterLitros / 1000).toFixed(1) : "—"}</strong>
               <span>m3/año</span>
             </div>
             <div className="impact-diff">
@@ -302,7 +324,13 @@ export default function ResultsDashboard({ answers, onRestart }) {
                 <span className="material-symbols-outlined">water_drop</span>
               </div>
               <div>
-                Aproximadamente <strong>{formatLiters(results.aguaLitros)} litros</strong> al año en lavarropas, riego y lavado de auto.
+                {hasWaterData ? (
+                  <>
+                    Aproximadamente <strong>{formatLiters(waterLitros)} litros</strong> al año en lavarropas, riego y lavado de auto.
+                  </>
+                ) : (
+                  "Completa el recorrido de agua para ver este dato."
+                )}
               </div>
             </div>
           </div>
@@ -345,23 +373,31 @@ export default function ResultsDashboard({ answers, onRestart }) {
             <p>Si todos vivieran como tu, este seria el espacio que requeririamos.</p>
           </div>
 
-          <div className="planet-icons">
-            {Array.from({ length: Math.floor(results.planetas) }).map((_, i) => (
-              <span key={i} className="material-symbols-outlined animate-float-slow" style={{ fontVariationSettings: "'FILL' 1", animationDelay: `${i * 160}ms` }}>
-                public
-              </span>
-            ))}
-            {results.planetas % 1 > 0.1 && (
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                public
-              </span>
-            )}
-          </div>
+          {isFullFootprint ? (
+            <>
+              <div className="planet-icons">
+                {Array.from({ length: Math.floor(results.planetas) }).map((_, i) => (
+                  <span key={i} className="material-symbols-outlined animate-float-slow" style={{ fontVariationSettings: "'FILL' 1", animationDelay: `${i * 160}ms` }}>
+                    public
+                  </span>
+                ))}
+                {results.planetas % 1 > 0.1 && (
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    public
+                  </span>
+                )}
+              </div>
 
-          <div className="planet-score">
-            <strong>{results.planetas}</strong>
-            <span>Planetas Tierra</span>
-          </div>
+              <div className="planet-score">
+                <strong>{results.planetas}</strong>
+                <span>Planetas Tierra</span>
+              </div>
+            </>
+          ) : (
+            <div className="planet-score">
+              <span>Los planetas se estiman con la encuesta ambiental completa.</span>
+            </div>
+          )}
 
           <button onClick={handleRestart} className="planet-button eco-glow-button">
             Volver a evaluar
@@ -410,6 +446,7 @@ export default function ResultsDashboard({ answers, onRestart }) {
         </section>
       )}
 
+      {hasEmissions && (
       <section className="tips-section">
         <div className="tips-header animate-rise">
           <h2 className="tips-title">Acciones Sugeridas</h2>
@@ -435,6 +472,7 @@ export default function ResultsDashboard({ answers, onRestart }) {
           ))}
         </div>
       </section>
+      )}
     </div>
   );
 }
