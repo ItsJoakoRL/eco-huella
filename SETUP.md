@@ -75,7 +75,11 @@ MONGODB_URI=mongodb://localhost:27017/eco-huella
 JWT_SECRET=tu_clave_secreta_super_segura_aqui_cambiarla_en_produccion
 JWT_EXPIRE=7d
 NODE_ENV=development
+# Opcional: orígenes permitidos por CORS, separados por coma (vacío = cualquiera)
+# CORS_ORIGIN=http://localhost:8080
 ```
+
+`JWT_SECRET` es obligatorio en producción (`NODE_ENV=production`): sin él el servidor no arranca.
 
 ### 3. Inicializar Base de Datos
 
@@ -89,6 +93,8 @@ Esto creará:
 - Usuario Test: user@eco-huella.com / user123456
 - Preguntas de ejemplo
 - Parámetros de emisión por defecto
+
+> **Atención:** el script **borra** usuarios, preguntas y parámetros. Si la base ya tiene usuarios se niega a continuar; para forzarlo usa `node seed.js --force`. Las contraseñas de prueba se pueden cambiar con las variables `SEED_ADMIN_PASSWORD` y `SEED_USER_PASSWORD`.
 
 ## Ejecución
 
@@ -257,4 +263,4 @@ const API_BASE_URL = "http://localhost:5001/api";
 
 - El JWT expira en 7 días (configurable en `.env`)
 - Las contraseñas se hashean con bcryptjs
-- Las preguntas y parámetros se pueden modificar sin tocar el código
+- El cuestionario lee `src/data/questions.json` y el cálculo usa `src/utils/quizResults.js`; las preguntas y parámetros del panel admin se guardan en MongoDB pero hoy no alimentan el cuestionario

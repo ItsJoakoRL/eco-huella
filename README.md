@@ -30,7 +30,7 @@ La app tiene tres pantallas principales:
 2. Quiz: recorre preguntas definidas en JSON y guarda respuestas.
 3. Dashboard: calcula resultados y muestra recomendaciones.
 
-La navegacion de estado se controla desde App con una maquina simple de pantallas.
+Las pantallas se enrutan con React Router (ver `src/App.jsx`). Las rutas internas exigen sesion iniciada y terminos aceptados; `/admin` ademas exige rol administrador.
 
 ## Modelo de datos
 
@@ -130,9 +130,9 @@ Tambien se puede abrir `start-dev.bat`.
 
 ## Estado actual
 
-- MVP funcional.
-- Datos y factores embebidos localmente (sin backend).
-- Diseño orientado a experiencia editorial y mobile-first.
+- MVP funcional con frontend (React) y backend (Express + MongoDB); ver `SETUP.md` para ejecutarlo.
+- Las preguntas y los factores del cuestionario viven en `src/data/questions.json` y el calculo en `src/utils/quizResults.js`. Las preguntas y parametros del panel de administracion se guardan en MongoDB pero hoy no alimentan el cuestionario.
+- Diseño mobile-first y app instalable (PWA).
 
 ## Proximos posibles pasos
 
