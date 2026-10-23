@@ -1,34 +1,9 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { authAPI } from "../services/api";
 import { clearLegacyQuizAnswers, clearQuizAnswers } from "../utils/quizStorage";
+import { TERMS_VERSION } from "../../backend/shared/terms";
 
 const AuthContext = createContext();
-const TERMS_STORAGE_KEY = "ecohuella_terms_accepted_v1";
-const TERMS_PENDING_STORAGE_KEY = "ecohuella_terms_pending_user_v1";
-
-const getUserId = (user) => user?.id || user?._id || null;
-
-const getAcceptedTermsUsers = () => {
-  try {
-    const storedValue = localStorage.getItem(TERMS_STORAGE_KEY);
-    const parsedValue = JSON.parse(storedValue || "[]");
-    return Array.isArray(parsedValue) ? parsedValue : [];
-  } catch {
-    return [];
-  }
-};
-
-const hasAcceptedTerms = (user) => {
-  const userId = getUserId(user);
-  return userId ? getAcceptedTermsUsers().includes(userId) : false;
-};
-
-const hasPendingTerms = (user) => {
-  const userId = getUserId(user);
-  return userId
-    ? localStorage.getItem(TERMS_PENDING_STORAGE_KEY) === userId
-    : false;
-};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -41,8 +16,11 @@ export const AuthProvider = ({ children }) => {
   // porque el token sea inválido): la sesión se conserva y se puede reintentar.
   const [connectionError, setConnectionError] = useState(false);
   const [error, setError] = useState(null);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [termsPending, setTermsPending] = useState(false);
+
+  // La aceptación de los términos la guarda el servidor (fecha y versión), no el
+  // navegador: vale en cualquier dispositivo y queda constancia. Si cambia el texto
+  // (TERMS_VERSION), hay que volver a aceptarlos.
+  const termsAccepted = Boolean(user) && user.termsVersion === TERMS_VERSION;
 
   // Verificar si el usuario está autenticado al cargar
   async function checkAuth() {
@@ -50,16 +28,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.getProfile();
       setUser(response.data.user);
-      setTermsAccepted(hasAcceptedTerms(response.data.user));
-      setTermsPending(hasPendingTerms(response.data.user));
     } catch (err) {
       console.error("Error al verificar autenticación:", err);
       const status = err.response?.status;
       if (status === 401 || status === 404) {
         // El servidor respondió y la sesión no vale (token vencido o cuenta borrada).
         setToken(null);
-        setTermsAccepted(false);
-        setTermsPending(false);
         localStorage.removeItem("token");
       } else {
         // Sin respuesta (red caída, servidor arrancando) o error del servidor: la
@@ -81,16 +55,10 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       const response = await authAPI.signup({ name, email, password, ...profile });
-      const userId = getUserId(response.data.user);
       setToken(response.data.token);
       setUser(response.data.user);
-      setTermsAccepted(false);
-      setTermsPending(true);
       clearLegacyQuizAnswers();
       clearQuizAnswers(response.data.user);
-      if (userId) {
-        localStorage.setItem(TERMS_PENDING_STORAGE_KEY, userId);
-      }
       localStorage.setItem("token", response.data.token);
       return response.data;
     } catch (err) {
@@ -112,8 +80,6 @@ export const AuthProvider = ({ children }) => {
       });
       setToken(response.data.token);
       setUser(response.data.user);
-      setTermsAccepted(hasAcceptedTerms(response.data.user));
-      setTermsPending(hasPendingTerms(response.data.user));
       localStorage.setItem("token", response.data.token);
       return response.data;
     } catch (err) {
@@ -128,8 +94,6 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    setTermsAccepted(false);
-    setTermsPending(false);
     localStorage.removeItem("token");
   }
 
@@ -145,36 +109,25 @@ export const AuthProvider = ({ children }) => {
     const handleSessionExpired = () => {
       setUser(null);
       setToken(null);
-      setTermsAccepted(false);
-      setTermsPending(false);
     };
 
     window.addEventListener("auth:expired", handleSessionExpired);
     return () => window.removeEventListener("auth:expired", handleSessionExpired);
   }, []);
 
-  const acceptTerms = () => {
-    const userId = getUserId(user);
-    if (!userId) return;
-
-    const acceptedUsers = getAcceptedTermsUsers();
-    const nextAcceptedUsers = acceptedUsers.includes(userId)
-      ? acceptedUsers
-      : [...acceptedUsers, userId];
-
-    localStorage.setItem(TERMS_STORAGE_KEY, JSON.stringify(nextAcceptedUsers));
-    localStorage.removeItem(TERMS_PENDING_STORAGE_KEY);
-    setTermsAccepted(true);
-    setTermsPending(false);
+  // Devuelve true si el servidor registró la aceptación; si no, no se da por aceptada.
+  const acceptTerms = async () => {
+    try {
+      const response = await authAPI.acceptTerms({ version: TERMS_VERSION });
+      setUser(response.data.user);
+      return true;
+    } catch (err) {
+      console.error("No se pudo registrar la aceptación de los términos:", err);
+      return false;
+    }
   };
 
   const rejectTerms = () => {
-    const userId = getUserId(user);
-    const acceptedUsers = getAcceptedTermsUsers().filter((id) => id !== userId);
-    localStorage.setItem(TERMS_STORAGE_KEY, JSON.stringify(acceptedUsers));
-    localStorage.removeItem(TERMS_PENDING_STORAGE_KEY);
-    setTermsAccepted(false);
-    setTermsPending(false);
     logout();
   };
 
@@ -210,7 +163,6 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!token,
     isAdmin: user?.role === "admin",
     termsAccepted,
-    termsPending,
     acceptTerms,
     rejectTerms,
     signup,

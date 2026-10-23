@@ -6,6 +6,7 @@ import {
   updateProfile,
   forgotPassword,
   resetPassword,
+  acceptTerms,
 } from "../controllers/authController.js";
 import { auth } from "../middleware/auth.js";
 import {
@@ -34,6 +35,7 @@ router.post(
   resetPassword
 );
 router.get("/profile", auth, getProfile);
+router.post("/accept-terms", auth, acceptTerms);
 // La foto de perfil viaja como data URL dentro del perfil: esta es la única ruta
 // con límite de cuerpo grande (el resto usa el límite chico de server.js) y solo
 // se lee el cuerpo después de comprobar la sesión.

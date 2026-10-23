@@ -1,5 +1,7 @@
 import { handleError } from "../utils/httpError.js";
 import QuizResult from "../models/QuizResult.js";
+import quizData from "../utils/quizData.js";
+import { SURVEY_TYPES, buildQuizResult, sanitizeAnswers } from "../shared/quizCalculator.js";
 
 export const getMyResults = async (req, res) => {
   try {
@@ -35,10 +37,6 @@ export const getResultById = async (req, res) => {
   }
 };
 
-// Debe coincidir con los recorridos de src/data/surveyTracks.js. Se valida para que
-// nadie invente tipos nuevos y eluda el límite de una encuesta de cada tipo.
-const SURVEY_TYPES = ["ambiental", "agua", "desayuno"];
-
 const isPlainObject = (value) =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
@@ -46,14 +44,16 @@ const ALREADY_COMPLETED = { message: "Esta encuesta ya fue completada por este u
 
 export const saveQuizResult = async (req, res) => {
   try {
-    const { answers, results, metadata } = req.body;
+    const { answers, metadata } = req.body;
 
-    if (!isPlainObject(answers) || !isPlainObject(results)) {
+    if (!isPlainObject(answers)) {
       return res.status(400).json({
-        message: "answers y results son requeridos",
+        message: "answers es requerido",
       });
     }
 
+    // Los resultados y metadatos que mande el cliente se ignoran: se recalculan acá
+    // con las respuestas, así nadie puede guardar números inventados.
     const surveyType = metadata?.survey_type || answers?._surveyType || "ambiental";
     if (!SURVEY_TYPES.includes(surveyType)) {
       return res.status(400).json({ message: "Tipo de encuesta inválido" });
@@ -71,12 +71,14 @@ export const saveQuizResult = async (req, res) => {
       return res.status(409).json(ALREADY_COMPLETED);
     }
 
+    const completedAt = new Date();
+    const derived = buildQuizResult(quizData, sanitizeAnswers(quizData, answers, surveyType), surveyType);
     const quizResult = await QuizResult.create({
       userId: req.userId,
-      answers: { ...answers, _surveyType: surveyType },
-      results,
-      metadata: { ...metadata, survey_type: surveyType },
-      completedAt: new Date(),
+      answers: derived.answers,
+      results: derived.results,
+      metadata: { ...derived.metadata, completed_at: completedAt },
+      completedAt,
     });
 
     res.status(201).json({
@@ -106,24 +108,29 @@ export const updateQuizResult = async (req, res) => {
       return res.status(403).json({ message: "Acceso denegado" });
     }
 
-    // Solo se aceptan estos campos: evita reasignar el dueño (userId) o tocar _id.
-    const { answers, results, metadata } = req.body;
-    if ([answers, results, metadata].some((value) => value !== undefined && !isPlainObject(value))) {
-      return res.status(400).json({ message: "answers, results y metadata deben ser objetos" });
+    // Lo único editable son las respuestas; los resultados y metadatos se recalculan
+    // a partir de ellas (lo que mande el cliente en results/metadata se ignora). Así
+    // se evita reasignar el dueño (userId), tocar _id o guardar números inventados.
+    const { answers } = req.body;
+    if (!isPlainObject(answers)) {
+      return res.status(400).json({ message: "answers es requerido y debe ser un objeto" });
     }
 
     // El tipo de encuesta no se puede cambiar: sería la forma de volver a responder
     // la misma encuesta pasándola por otro tipo.
     const surveyType =
       result.metadata?.survey_type || result.answers?.get("_surveyType") || "ambiental";
-    const updates = {};
-    if (answers !== undefined) updates.answers = { ...answers, _surveyType: surveyType };
-    if (results !== undefined) updates.results = results;
-    if (metadata !== undefined) updates.metadata = { ...metadata, survey_type: surveyType };
+    const derived = buildQuizResult(quizData, sanitizeAnswers(quizData, answers, surveyType), surveyType);
 
     result = await QuizResult.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      {
+        $set: {
+          answers: derived.answers,
+          results: derived.results,
+          metadata: { ...derived.metadata, completed_at: result.metadata?.completed_at },
+        },
+      },
       { new: true, runValidators: true }
     );
 

@@ -121,6 +121,13 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    // Constancia de la aceptación de los Términos y Condiciones (fecha y versión).
+    termsAcceptedAt: {
+      type: Date,
+    },
+    termsVersion: {
+      type: String,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],

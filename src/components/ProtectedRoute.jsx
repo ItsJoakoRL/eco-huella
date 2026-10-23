@@ -10,7 +10,6 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     connectionError,
     retryAuth,
     termsAccepted,
-    termsPending,
   } = useAuth();
 
   if (!isAuthenticated) {
@@ -40,7 +39,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     );
   }
 
-  if (termsPending || !termsAccepted) {
+  if (!termsAccepted) {
     return <Navigate to="/terminos-y-condiciones" replace />;
   }
 

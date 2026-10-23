@@ -89,6 +89,8 @@ npm run seed
 
 Esto crea usuarios de prueba, preguntas y parametros iniciales.
 
+Las contrasenas de esos usuarios se generan al azar y se muestran **una sola vez** al terminar: guardalas. Si prefieres elegirlas, define `SEED_ADMIN_PASSWORD` y `SEED_USER_PASSWORD` antes de correr el comando. Para dejar una sola cuenta en una base ya usada, mira `backend/scripts/keep-only-account.js`.
+
 ## 5. Publicar frontend en Vercel
 
 1. Entra a `https://vercel.com`.

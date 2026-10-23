@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendPasswordResetCode } from "../utils/emailService.js";
 import { getJwtSecret } from "../config/jwt.js";
+import { TERMS_VERSION } from "../shared/terms.js";
 
 const MAX_RESET_ATTEMPTS = 5;
 
@@ -14,6 +15,32 @@ const generateToken = (userId, role) => {
     { expiresIn: process.env.JWT_EXPIRE || "7d" }
   );
 };
+
+// Datos del usuario que se devuelven al cliente (nunca la contraseña ni los códigos de recuperación).
+const toUserPayload = (user, extra = {}) => ({
+  id: user._id,
+  name: user.name,
+  username: user.username,
+  email: user.email,
+  role: user.role,
+  age: user.age,
+  birthDate: user.birthDate,
+  sex: user.sex,
+  city: user.city,
+  province: user.province,
+  country: user.country,
+  uccuyoLevel: user.uccuyoLevel,
+  occupation: user.occupation,
+  householdSize: user.householdSize,
+  sustainabilityGoal: user.sustainabilityGoal,
+  avatarUrl: user.avatarUrl,
+  avatarZoom: user.avatarZoom,
+  avatarOffsetX: user.avatarOffsetX,
+  avatarOffsetY: user.avatarOffsetY,
+  termsAcceptedAt: user.termsAcceptedAt,
+  termsVersion: user.termsVersion,
+  ...extra,
+});
 
 const withTimeout = (promise, milliseconds, message) =>
   Promise.race([
@@ -92,27 +119,7 @@ export const signup = async (req, res) => {
     res.status(201).json({
       message: "Usuario registrado exitosamente",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        age: user.age,
-        birthDate: user.birthDate,
-        sex: user.sex,
-        city: user.city,
-        province: user.province,
-        country: user.country,
-        uccuyoLevel: user.uccuyoLevel,
-        occupation: user.occupation,
-        householdSize: user.householdSize,
-        sustainabilityGoal: user.sustainabilityGoal,
-        avatarUrl: user.avatarUrl,
-        avatarZoom: user.avatarZoom,
-        avatarOffsetX: user.avatarOffsetX,
-        avatarOffsetY: user.avatarOffsetY,
-      },
+      user: toUserPayload(user),
     });
   } catch (error) {
     handleError(res, error);
@@ -151,27 +158,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       message: "Sesión iniciada exitosamente",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        age: user.age,
-        birthDate: user.birthDate,
-        sex: user.sex,
-        city: user.city,
-        province: user.province,
-        country: user.country,
-        uccuyoLevel: user.uccuyoLevel,
-        occupation: user.occupation,
-        householdSize: user.householdSize,
-        sustainabilityGoal: user.sustainabilityGoal,
-        avatarUrl: user.avatarUrl,
-        avatarZoom: user.avatarZoom,
-        avatarOffsetX: user.avatarOffsetX,
-        avatarOffsetY: user.avatarOffsetY,
-      },
+      user: toUserPayload(user),
     });
   } catch (error) {
     handleError(res, error);
@@ -186,28 +173,7 @@ export const getProfile = async (req, res) => {
     }
 
     res.status(200).json({
-      user: {
-        id: user._id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        age: user.age,
-        birthDate: user.birthDate,
-        sex: user.sex,
-        city: user.city,
-        province: user.province,
-        country: user.country,
-        uccuyoLevel: user.uccuyoLevel,
-        occupation: user.occupation,
-        householdSize: user.householdSize,
-        sustainabilityGoal: user.sustainabilityGoal,
-        avatarUrl: user.avatarUrl,
-        avatarZoom: user.avatarZoom,
-        avatarOffsetX: user.avatarOffsetX,
-        avatarOffsetY: user.avatarOffsetY,
-        createdAt: user.createdAt,
-      },
+      user: toUserPayload(user, { createdAt: user.createdAt }),
     });
   } catch (error) {
     handleError(res, error);
@@ -299,27 +265,7 @@ export const updateProfile = async (req, res) => {
       // Cambiar la contraseña invalida los tokens anteriores, incluido el de esta
       // sesión: se entrega uno nuevo para no sacar al usuario de la app.
       ...(password && { token: generateToken(user._id, user.role) }),
-      user: {
-        id: user._id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        age: user.age,
-        birthDate: user.birthDate,
-        sex: user.sex,
-        city: user.city,
-        province: user.province,
-        country: user.country,
-        uccuyoLevel: user.uccuyoLevel,
-        occupation: user.occupation,
-        householdSize: user.householdSize,
-        sustainabilityGoal: user.sustainabilityGoal,
-        avatarUrl: user.avatarUrl,
-        avatarZoom: user.avatarZoom,
-        avatarOffsetX: user.avatarOffsetX,
-        avatarOffsetY: user.avatarOffsetY,
-      },
+      user: toUserPayload(user),
     });
   } catch (error) {
     handleError(res, error);
@@ -435,6 +381,32 @@ export const resetPassword = async (req, res) => {
 
     res.status(200).json({
       message: "Contraseña actualizada correctamente",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const acceptTerms = async (req, res) => {
+  try {
+    if (req.body?.version !== TERMS_VERSION) {
+      return res.status(400).json({
+        message: "La versión de los términos no es la vigente. Recarga la página e intenta de nuevo.",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { termsAcceptedAt: new Date(), termsVersion: TERMS_VERSION },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.status(200).json({
+      message: "Términos aceptados",
+      user: toUserPayload(user, { createdAt: user.createdAt }),
     });
   } catch (error) {
     handleError(res, error);

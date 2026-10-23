@@ -264,4 +264,4 @@ const API_BASE_URL = "http://localhost:5001/api";
 
 - El JWT expira en 7 días (configurable en `.env`)
 - Las contraseñas se hashean con bcryptjs
-- El cuestionario lee `src/data/questions.json` y el cálculo usa `src/utils/quizResults.js`; las preguntas y parámetros del panel admin se guardan en MongoDB pero hoy no alimentan el cuestionario
+- El cuestionario lee `backend/shared/questions.json` y el cálculo usa `backend/shared/quizCalculator.js` (el servidor lo recalcula al guardar cada encuesta); las preguntas y parámetros del panel admin se guardan en MongoDB pero hoy no alimentan el cuestionario

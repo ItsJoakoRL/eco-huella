@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import QuestionCard from "./QuestionCard";
-import quizData from "../../data/questions.json";
+import quizData from "../../data/quizData";
 import { getSurveyTrack } from "../../data/surveyTracks";
 import { useAuth } from "../../context/AuthContext";
 import { clearLegacyQuizAnswers, getCompletedSurveyTypes, loadQuizHistory, saveQuizAttempt } from "../../utils/quizStorage";

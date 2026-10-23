@@ -1,3 +1,5 @@
+import { SURVEY_MODULES } from "../../backend/shared/quizCalculator";
+
 export const surveyTracks = [
   {
     id: "ambiental",
@@ -5,7 +7,7 @@ export const surveyTracks = [
     subtitle: "Huella general",
     description: "Hogar, transporte, alimentacion y residuos.",
     icon: "eco",
-    modules: ["hogar", "transporte", "alimentacion", "residuos"],
+    modules: SURVEY_MODULES.ambiental,
   },
   {
     id: "agua",
@@ -13,7 +15,7 @@ export const surveyTracks = [
     subtitle: "Habitos semanales",
     description: "Lavarropas, riego de plantas y lavado del auto.",
     icon: "water_drop",
-    modules: ["agua"],
+    modules: SURVEY_MODULES.agua,
   },
   {
     id: "desayuno",
@@ -21,7 +23,7 @@ export const surveyTracks = [
     subtitle: "4 preguntas",
     description: "Bebida, comida principal, origen y desperdicio.",
     icon: "breakfast_dining",
-    modules: ["desayuno"],
+    modules: SURVEY_MODULES.desayuno,
   },
 ];
 

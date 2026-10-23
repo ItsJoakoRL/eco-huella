@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
 import { calculateQuizResults } from "../../utils/quizResults";
 import { quizResultsAPI } from "../../services/api";
-import quizData from "../../data/questions.json";
+import quizData from "../../data/quizData";
 
 const formatAttemptDate = (dateValue) =>
   new Intl.DateTimeFormat("es-AR", {

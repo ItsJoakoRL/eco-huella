@@ -74,11 +74,20 @@ src/
 		layout/
 			Layout.jsx
 	data/
-		questions.json
+		quizData.js
+	utils/
+		quizResults.js
 	index.css
 	App.jsx
 	main.jsx
+backend/
+	shared/
+		questions.json
+		quizCalculator.js
+		terms.js
 ```
+
+`backend/shared/` lo usan el frontend y el servidor: el calculo de la huella y las preguntas viven ahi (Render solo despliega `backend/`), asi el servidor recalcula con la misma logica que ve el usuario.
 
 ## Configuracion de estilos
 
@@ -131,14 +140,15 @@ Tambien se puede abrir `start-dev.bat`.
 ## Estado actual
 
 - MVP funcional con frontend (React) y backend (Express + MongoDB); ver `SETUP.md` para ejecutarlo.
-- Las preguntas y los factores del cuestionario viven en `src/data/questions.json` y el calculo en `src/utils/quizResults.js`. Las preguntas y parametros del panel de administracion se guardan en MongoDB pero hoy no alimentan el cuestionario.
+- Las preguntas y los factores del cuestionario viven en `backend/shared/questions.json` y el calculo en `backend/shared/quizCalculator.js` (el frontend lo usa desde `src/utils/quizResults.js`). Las preguntas y parametros del panel de administracion se guardan en MongoDB pero hoy no alimentan el cuestionario.
+- Al guardar una encuesta, el servidor ignora los resultados que manda el navegador y los recalcula a partir de las respuestas.
+- La aceptacion de los Terminos y Condiciones se registra en el servidor (fecha y version). Al cambiar el texto hay que subir `TERMS_VERSION` en `backend/shared/terms.js`: todos vuelven a aceptarlos.
+- El servidor limita los intentos de login, registro y recuperacion de contrasena (ver `backend/middleware/rateLimit.js`).
 - Diseño mobile-first y app instalable (PWA).
 
 ## Proximos posibles pasos
 
-- Persistir resultados historicos por usuario.
 - Externalizar factores de emision por version o region.
 - Agregar tests unitarios para reglas de calculo.
 - Exponer export de reporte (PDF o CSV).
-- Integrar autenticacion y API para seguimiento longitudinal.
 
