@@ -76,7 +76,7 @@ const LoginPage = () => {
     }
 
     if (!/^\d{6}$/.test(resetToken)) {
-      setRecoveryError("Ingresa el código de 6 dígitos que recibiste por correo");
+      setRecoveryError("Ingresa el código de 6 dígitos (el del correo o el que te dio un administrador)");
       return;
     }
 
@@ -84,12 +84,12 @@ const LoginPage = () => {
 
     try {
       await authAPI.resetPassword({
-        email: recoveryEmail,
+        email: recoveryEmail.trim().toLowerCase(),
         token: resetToken,
         password: newPassword,
       });
       setPassword("");
-      setEmail(recoveryEmail);
+      setEmail(recoveryEmail.trim());
       setRecoveryMessage("Contraseña actualizada. Ya puedes iniciar sesión.");
       setRecoveryStep("done");
     } catch (err) {
@@ -295,8 +295,9 @@ const LoginPage = () => {
               <div>
                 <h2>Crear nueva contraseña</h2>
                 <p>
-                  Ingresa el correo que usaste al registrarte y te enviamos
-                  un código de 6 dígitos para cambiar tu contraseña.
+                  {recoveryStep === "email"
+                    ? "Ingresa el correo que usaste al registrarte y te enviamos un código de 6 dígitos para cambiar tu contraseña."
+                    : "Con el código de 6 dígitos que recibiste por correo, o que te dio un administrador, elige una contraseña nueva."}
                 </p>
               </div>
             </div>
@@ -327,11 +328,35 @@ const LoginPage = () => {
                 >
                   {recoveryLoading ? "Enviando..." : "Enviar código"}
                 </Button>
+
+                <button
+                  type="button"
+                  className="login-forgot"
+                  onClick={() => {
+                    setRecoveryError("");
+                    setRecoveryMessage("");
+                    setRecoveryStep("reset");
+                  }}
+                >
+                  Ya tengo un código (me lo dio un administrador)
+                </button>
               </form>
             )}
 
             {recoveryStep === "reset" && (
               <form onSubmit={handlePasswordReset} className="recovery-form">
+                <label className="signup-field">
+                  Correo registrado
+                  <input
+                    type="email"
+                    value={recoveryEmail}
+                    onChange={(e) => setRecoveryEmail(e.target.value)}
+                    className={inputClasses}
+                    placeholder="tu@gmail.com"
+                    required
+                  />
+                </label>
+
                 <label className="signup-field">
                   Código de 6 dígitos
                   <input

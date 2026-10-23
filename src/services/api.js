@@ -90,6 +90,7 @@ export const usersAPI = {
   update: (id, data) => api.put(`/admin/users/${id}`, data),
   delete: (id) => api.delete(`/admin/users/${id}`),
   changeRole: (id, role) => api.patch(`/admin/users/${id}/role`, { role }),
+  createResetCode: (id) => api.post(`/admin/users/${id}/reset-code`),
 };
 
 export default api;

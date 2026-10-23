@@ -1,10 +1,10 @@
 import { handleError } from "../utils/httpError.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { sendPasswordResetCode } from "../utils/emailService.js";
 import { getJwtSecret } from "../config/jwt.js";
 import { TERMS_VERSION } from "../shared/terms.js";
+import { generateResetCode, hashResetCode } from "../utils/resetCode.js";
 
 const MAX_RESET_ATTEMPTS = 5;
 
@@ -295,11 +295,8 @@ export const forgotPassword = async (req, res) => {
       return res.status(200).json(genericResponse);
     }
 
-    const resetToken = String(crypto.randomInt(100000, 1000000));
-    user.resetPasswordToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
+    const { code: resetToken, hash: resetTokenHash } = generateResetCode();
+    user.resetPasswordToken = resetTokenHash;
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
     user.resetPasswordAttempts = 0;
 
@@ -343,7 +340,7 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const hashedToken = hashResetCode(token);
     const user = await User.findOne({ email: registeredEmail }).select(
       "+password +resetPasswordToken +resetPasswordExpires +resetPasswordAttempts"
     );

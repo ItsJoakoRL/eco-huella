@@ -5,6 +5,7 @@ import {
   updateUser,
   deleteUser,
   changeUserRole,
+  createResetCode,
 } from "../controllers/userController.js";
 import { auth, isAdmin } from "../middleware/auth.js";
 
@@ -16,5 +17,6 @@ router.get("/:id", auth, isAdmin, getUserById);
 router.put("/:id", auth, isAdmin, updateUser);
 router.delete("/:id", auth, isAdmin, deleteUser);
 router.patch("/:id/role", auth, isAdmin, changeUserRole);
+router.post("/:id/reset-code", auth, isAdmin, createResetCode);
 
 export default router;

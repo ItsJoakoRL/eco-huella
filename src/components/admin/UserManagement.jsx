@@ -47,6 +47,8 @@ const UserManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [pendingDeleteUser, setPendingDeleteUser] = useState(null);
+  const [resetCodeInfo, setResetCodeInfo] = useState(null);
+  const [resetCodeCopied, setResetCodeCopied] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -146,6 +148,28 @@ const UserManagement = () => {
     } catch (err) {
       setError("No se pudo eliminar el usuario.");
       console.error(err);
+    }
+  };
+
+  // El código solo se muestra acá, una vez: el servidor guarda únicamente su hash.
+  const handleGenerateCode = async (user) => {
+    try {
+      setError("");
+      const response = await usersAPI.createResetCode(user._id);
+      setResetCodeCopied(false);
+      setResetCodeInfo(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || "No se pudo generar el código.");
+      console.error(err);
+    }
+  };
+
+  const copyResetCode = async () => {
+    try {
+      await navigator.clipboard.writeText(resetCodeInfo.code);
+      setResetCodeCopied(true);
+    } catch {
+      // El navegador no dio permiso para copiar: el código sigue visible en pantalla.
     }
   };
 
@@ -605,6 +629,15 @@ const UserManagement = () => {
                         <button
                           type="button"
                           className="admin-icon-button"
+                          onClick={() => handleGenerateCode(user)}
+                          title="Generar código de recuperación"
+                          aria-label={`Generar código de recuperación para ${user.username}`}
+                        >
+                          <span className="material-symbols-outlined">lock_reset</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-icon-button"
                           onClick={() => handleEdit(user)}
                           title="Editar usuario"
                         >
@@ -627,6 +660,49 @@ const UserManagement = () => {
           </div>
         )}
       </div>
+
+      {resetCodeInfo && createPortal(
+        <div
+          className="confirm-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Código de recuperación"
+        >
+          <div className="confirm-modal animate-pop">
+            <span className="confirm-modal-icon success material-symbols-outlined">lock_reset</span>
+            <h2>Código de recuperación</h2>
+            <p>
+              Para <strong>{resetCodeInfo.user?.name || resetCodeInfo.user?.username}</strong> (
+              {resetCodeInfo.user?.email})
+            </p>
+            <div className="reset-code" data-code={resetCodeInfo.code}>
+              {resetCodeInfo.code.slice(0, 3)} {resetCodeInfo.code.slice(3)}
+            </div>
+            <p className="reset-code-help">
+              Dáselo a esa persona. Tiene que entrar a <strong>"Olvidaste tu contraseña?"</strong> en el
+              login, tocar <strong>"Ya tengo un código"</strong>, poner su correo, este código y
+              elegir una contraseña nueva.
+            </p>
+            <p className="reset-code-help">
+              Vence en {resetCodeInfo.expiresInMinutes} minutos y sirve una sola vez. Solo se muestra
+              ahora: si lo perdés, generá otro.
+            </p>
+            <div className="confirm-modal-actions">
+              <button type="button" className="admin-secondary-button" onClick={copyResetCode}>
+                {resetCodeCopied ? "Copiado" : "Copiar código"}
+              </button>
+              <button
+                type="button"
+                className="admin-primary-button"
+                onClick={() => setResetCodeInfo(null)}
+              >
+                Listo
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {pendingDeleteUser && createPortal(
         <div

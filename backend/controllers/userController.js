@@ -1,6 +1,10 @@
 import { handleError } from "../utils/httpError.js";
 import User from "../models/User.js";
 import QuizResult from "../models/QuizResult.js";
+import { generateResetCode } from "../utils/resetCode.js";
+
+// Un código dado en persona o por mensaje tarda más en usarse que uno por mail.
+const ADMIN_RESET_CODE_MINUTES = 60;
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -177,6 +181,36 @@ export const changeUserRole = async (req, res) => {
     res.status(200).json({
       message: "Rol de usuario actualizado exitosamente",
       user,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// El administrador genera un código de 6 dígitos para que la persona restablezca su
+// contraseña sin depender del correo. Se canjea en POST /api/auth/reset-password
+// (correo + código + contraseña nueva): tiene vencimiento, sirve una sola vez y
+// admite 5 intentos. El código solo viaja en esta respuesta; en la base queda su hash.
+export const createResetCode = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const { code, hash } = generateResetCode();
+    const expiresAt = new Date(Date.now() + ADMIN_RESET_CODE_MINUTES * 60 * 1000);
+    user.resetPasswordToken = hash;
+    user.resetPasswordExpires = expiresAt;
+    user.resetPasswordAttempts = 0;
+    await user.save({ validateBeforeSave: false });
+
+    res.set("Cache-Control", "no-store");
+    res.status(200).json({
+      code,
+      expiresAt,
+      expiresInMinutes: ADMIN_RESET_CODE_MINUTES,
+      user: { id: user._id, name: user.name, username: user.username, email: user.email },
     });
   } catch (error) {
     handleError(res, error);
