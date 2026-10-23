@@ -8,7 +8,7 @@ const roleLabels = {
 };
 
 const uccuyoLevelLabels = {
-  jardin: "Jardin",
+  jardin: "Jardín",
   primario: "Primario",
   secundaria: "Secundaria",
   universidad: "Universidad",
@@ -16,7 +16,7 @@ const uccuyoLevelLabels = {
 
 const uccuyoLevelOptions = [
   { value: "", label: "Sin definir" },
-  { value: "jardin", label: "Jardin" },
+  { value: "jardin", label: "Jardín" },
   { value: "primario", label: "Primario" },
   { value: "secundaria", label: "Secundaria" },
   { value: "universidad", label: "Universidad" },
@@ -91,7 +91,7 @@ const UserManagement = () => {
     const calculatedAge = calculateAge(formData.birthDate);
 
     if (formData.birthDate && (calculatedAge < 0 || calculatedAge > 120)) {
-      setError("Ingresa una fecha de nacimiento valida.");
+      setError("Ingresa una fecha de nacimiento válida.");
       return;
     }
 
@@ -235,7 +235,7 @@ const UserManagement = () => {
     <div className="admin-section">
       <header className="admin-section-head">
         <div>
-          <span className="admin-kicker">Gestion de cuentas</span>
+          <span className="admin-kicker">Gestión de cuentas</span>
           <h2>Usuarios</h2>
           <p>Controla accesos, permisos y datos visibles de cada cuenta.</p>
         </div>
@@ -250,7 +250,7 @@ const UserManagement = () => {
             <span className="material-symbols-outlined">edit_square</span>
             <div>
               <h3>{editingId ? "Editar usuario" : "Nuevo usuario"}</h3>
-              <p>Actualiza la informacion basica y el rol de acceso.</p>
+              <p>Actualiza la información básica y el rol de acceso.</p>
             </div>
           </div>
 
@@ -381,7 +381,7 @@ const UserManagement = () => {
             </label>
 
             <label>
-              Pais
+              País
               <input
                 type="text"
                 value={formData.country}
@@ -410,7 +410,7 @@ const UserManagement = () => {
             </label>
 
             <label>
-              Ocupacion
+              Ocupación
               <input
                 type="text"
                 value={formData.occupation}
@@ -453,10 +453,10 @@ const UserManagement = () => {
                 <option value="">Sin definir</option>
                 <option value="learn">Aprender sobre mi impacto</option>
                 <option value="save_water">Cuidar el agua</option>
-                <option value="reduce_energy">Ahorrar energia</option>
-                <option value="eat_better">Mejorar mis habitos de alimentacion</option>
+                <option value="reduce_energy">Ahorrar energía</option>
+                <option value="eat_better">Mejorar mis hábitos de alimentación</option>
                 <option value="waste_less">Generar menos residuos</option>
-                <option value="move_better">Moverme de forma mas sustentable</option>
+                <option value="move_better">Moverme de forma más sustentable</option>
               </select>
             </label>
 
@@ -470,7 +470,7 @@ const UserManagement = () => {
                     setFormData({ ...formData, password: event.target.value })
                   }
                   className="admin-input"
-                  placeholder="Dejar vacio para no cambiarla"
+                  placeholder="Dejar vacío para no cambiarla"
                 />
                 <button
                   type="button"
@@ -578,7 +578,7 @@ const UserManagement = () => {
                         <span>
                           <span className="material-symbols-outlined">location_on</span>
                           {[user.city, user.province].filter(Boolean).join(", ") ||
-                            "Ubicacion pendiente"}
+                            "Ubicación pendiente"}
                         </span>
                         <span>
                           <span className="material-symbols-outlined">cake</span>
@@ -679,7 +679,7 @@ const UserManagement = () => {
               {resetCodeInfo.code.slice(0, 3)} {resetCodeInfo.code.slice(3)}
             </div>
             <p className="reset-code-help">
-              Dáselo a esa persona. Tiene que entrar a <strong>"Olvidaste tu contraseña?"</strong> en el
+              Dáselo a esa persona. Tiene que entrar a <strong>"¿Olvidaste tu contraseña?"</strong> en el
               login, tocar <strong>"Ya tengo un código"</strong>, poner su correo, este código y
               elegir una contraseña nueva.
             </p>
@@ -709,14 +709,14 @@ const UserManagement = () => {
           className="confirm-modal-backdrop"
           role="dialog"
           aria-modal="true"
-          aria-label="Eliminar correo"
+          aria-label="Eliminar cuenta"
         >
           <div className="confirm-modal animate-pop">
             <span className="confirm-modal-icon material-symbols-outlined">delete</span>
-            <h2>Seguro que quieres eliminar este correo?</h2>
+            <h2>¿Seguro que quieres eliminar esta cuenta?</h2>
             <p>
-              Se eliminara la cuenta asociada a <strong>{pendingDeleteUser.email}</strong>.
-              Esta accion no se puede deshacer.
+              Se eliminará la cuenta asociada a <strong>{pendingDeleteUser.email}</strong>.
+              También se borrarán todas sus encuestas. Esta acción no se puede deshacer.
             </p>
             <div className="confirm-modal-actions">
               <button type="button" className="admin-secondary-button" onClick={cancelDelete}>

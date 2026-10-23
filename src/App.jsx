@@ -28,17 +28,17 @@ export default function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/terminos-y-condiciones" element={<TermsAndConditionsPage />} />
 
-          {/* Protected routes */}
+          {/* La portada es pública: quien abre el link ve el proyecto antes de registrarse */}
           <Route
             path="/"
             element={
-              <ProtectedRoute>
-                <Layout>
-                  <LandingPage />
-                </Layout>
-              </ProtectedRoute>
+              <Layout>
+                <LandingPage />
+              </Layout>
             }
           />
+
+          {/* Protected routes */}
 
           <Route
             path="/encuestas"

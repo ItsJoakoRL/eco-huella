@@ -40,7 +40,7 @@ export default function SurveySelector() {
     <section className="survey-select-page eco-aurora">
       <div className="survey-select-head animate-rise">
         <span className="dashboard-eyebrow">Elegir recorrido</span>
-        <h1>Que encuesta queres responder?</h1>
+        <h1>¿Qué encuesta querés responder?</h1>
         <p>Selecciona un camino. Cada recorrido se puede completar una sola vez.</p>
       </div>
 

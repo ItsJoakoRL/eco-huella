@@ -4,7 +4,7 @@ import { questionsAPI } from "../../services/api";
 const moduleLabels = {
   housing: "Hogar",
   transport: "Transporte",
-  food: "Alimentacion",
+  food: "Alimentación",
   waste: "Residuos",
 };
 
@@ -64,7 +64,7 @@ const QuestionManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Seguro que quieres eliminar esta pregunta?")) return;
+    if (!window.confirm("¿Seguro que quieres eliminar esta pregunta?")) return;
 
     try {
       await questionsAPI.delete(id);
@@ -119,6 +119,11 @@ const QuestionManagement = () => {
         </button>
       </header>
 
+      <div className="admin-alert admin-note">
+        Aviso: por ahora el cuestionario se lee de un archivo del sistema. Los cambios que hagas acá
+        se guardan, pero todavía no modifican las preguntas que ven los usuarios ni el cálculo.
+      </div>
+
       {error && <div className="admin-alert">{error}</div>}
 
       {showForm && (
@@ -127,7 +132,7 @@ const QuestionManagement = () => {
             <span className="material-symbols-outlined">fact_check</span>
             <div>
               <h3>{editingId ? "Editar pregunta" : "Nueva pregunta"}</h3>
-              <p>Define modulo, tipo y orden dentro del diagnostico.</p>
+              <p>Define módulo, tipo y orden dentro del diagnóstico.</p>
             </div>
           </div>
 
@@ -156,7 +161,7 @@ const QuestionManagement = () => {
               >
                 <option value="housing">Hogar</option>
                 <option value="transport">Transporte</option>
-                <option value="food">Alimentacion</option>
+                <option value="food">Alimentación</option>
                 <option value="waste">Residuos</option>
               </select>
             </label>
@@ -171,7 +176,7 @@ const QuestionManagement = () => {
                 className="admin-input"
               >
                 <option value="select">Select</option>
-                <option value="number">Numero</option>
+                <option value="number">Número</option>
                 <option value="range">Rango</option>
               </select>
             </label>

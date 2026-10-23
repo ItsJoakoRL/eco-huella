@@ -79,8 +79,8 @@ export const updateUser = async (req, res) => {
     if (duplicateUser) {
       const message =
         duplicateUser.email === normalizedEmail
-          ? "El email ya esta registrado"
-          : "El nombre de usuario ya esta registrado";
+          ? "El email ya está registrado"
+          : "El nombre de usuario ya está registrado";
       return res.status(400).json({ message });
     }
 
@@ -120,8 +120,8 @@ export const updateUser = async (req, res) => {
       const field = Object.keys(error.keyPattern || {})[0];
       const message =
         field === "email"
-          ? "El email ya esta registrado"
-          : "El nombre de usuario ya esta registrado";
+          ? "El email ya está registrado"
+          : "El nombre de usuario ya está registrado";
       return res.status(400).json({ message });
     }
 

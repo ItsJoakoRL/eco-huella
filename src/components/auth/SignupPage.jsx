@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../ui/Button";
+import UniversityBadge from "../ui/UniversityBadge";
 import ecoHuellaLogo from "../../assets/eco-huella-logo-generated.png";
 
 const inputClasses = "signup-input";
@@ -9,15 +10,15 @@ const inputClasses = "signup-input";
 const fieldLabels = {
   name: "Nombre completo",
   username: "Nombre de usuario",
-  email: "Correo electronico",
+  email: "Correo electrónico",
   age: "Edad",
   birthDate: "Fecha de nacimiento",
   sex: "Sexo",
   city: "Ciudad",
   province: "Provincia",
-  country: "Pais",
+  country: "País",
   uccuyoLevel: "Nivel UCCuyo",
-  occupation: "Ocupacion",
+  occupation: "Ocupación",
   householdSize: "Personas en el hogar",
   sustainabilityGoal: "¿Qué querés mejorar?",
   password: "Contraseña",
@@ -80,14 +81,14 @@ const SignupPage = () => {
 
     if (!/^[a-zA-Z0-9_]{3,24}$/.test(formData.username)) {
       setError(
-        "El nombre de usuario debe tener entre 3 y 24 caracteres y solo puede usar letras, numeros o guion bajo"
+        "El nombre de usuario debe tener entre 3 y 24 caracteres y solo puede usar letras, números o guion bajo"
       );
       return;
     }
 
     const calculatedAge = calculateAge(formData.birthDate);
     if (!formData.birthDate || calculatedAge < 0 || calculatedAge > 120) {
-      setError("Debes ingresar una fecha de nacimiento valida");
+      setError("Debes ingresar una fecha de nacimiento válida");
       return;
     }
 
@@ -132,16 +133,17 @@ const SignupPage = () => {
             <div className="signup-aside-content">
               <div>
                 <span className="signup-eyebrow">Perfil sustentable</span>
-                <h1>Datos que hacen mas preciso tu impacto.</h1>
+                <h1>Datos que hacen más preciso tu impacto.</h1>
                 <p>
                   Cuanto mejor entendemos tu contexto, mejores son las
                   recomendaciones para reducir tu huella.
                 </p>
+                <UniversityBadge variant="aside" />
               </div>
 
               <div className="signup-feature-list">
                 {[
-                  ["location_on", "Ubicacion", "Factores locales y habitos"],
+                  ["location_on", "Ubicación", "Factores locales y hábitos"],
                   ["home", "Hogar", "Personas que comparten consumos"],
                   ["flag", "Objetivo", "Acciones alineadas a tu meta"],
                 ].map(([icon, title, text]) => (
@@ -164,7 +166,7 @@ const SignupPage = () => {
                 <h2>Registrarse</h2>
               </div>
               <Link to="/login" className="signup-login-link">
-                Ya tienes una cuenta?
+                ¿Ya tienes una cuenta?
               </Link>
             </div>
 
@@ -263,7 +265,7 @@ const SignupPage = () => {
                   </span>
                   <div>
                     <h3>Contexto personal</h3>
-                    <p>Estos datos ayudan a personalizar el diagnostico.</p>
+                    <p>Estos datos ayudan a personalizar el diagnóstico.</p>
                   </div>
                 </div>
 
@@ -306,10 +308,10 @@ const SignupPage = () => {
                       <option value="">Elegir una meta</option>
                       <option value="learn">Aprender sobre mi impacto</option>
                       <option value="save_water">Cuidar el agua</option>
-                      <option value="reduce_energy">Ahorrar energia</option>
-                      <option value="eat_better">Mejorar mis habitos de alimentacion</option>
+                      <option value="reduce_energy">Ahorrar energía</option>
+                      <option value="eat_better">Mejorar mis hábitos de alimentación</option>
                       <option value="waste_less">Generar menos residuos</option>
-                      <option value="move_better">Moverme de forma mas sustentable</option>
+                      <option value="move_better">Moverme de forma más sustentable</option>
                     </select>
                   </label>
                 </div>

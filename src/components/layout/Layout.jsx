@@ -1,10 +1,11 @@
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ProfileModal from "../profile/ProfileModal";
+import UniversityBadge from "../ui/UniversityBadge";
 
 export default function Layout({ children }) {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const initials = user?.name
@@ -34,16 +35,20 @@ export default function Layout({ children }) {
         <span className="nature-glyph glyph-bolt material-symbols-outlined">energy_savings_leaf</span>
       </div>
       <header className="app-header">
-        <nav className="app-nav">
-          <button className="brand-lockup" type="button" onClick={() => navigate("/")} aria-label="Ir al inicio">
-            <span className="brand-mark">
-              <span className="material-symbols-outlined text-2xl">eco</span>
-            </span>
-            <span className="brand-text">
-              <span className="brand-name">EcoHuella</span>
-              <span className="brand-subtitle">Impacto sostenible</span>
-            </span>
-          </button>
+        <nav className={`app-nav${isAdmin ? " app-nav-admin" : ""}`}>
+          <div className="nav-brand-group">
+            <button className="brand-lockup" type="button" onClick={() => navigate("/")} aria-label="Ir al inicio">
+              <span className="brand-mark">
+                <span className="material-symbols-outlined text-2xl">eco</span>
+              </span>
+              <span className="brand-text">
+                <span className="brand-name">EcoHuella</span>
+                <span className="brand-subtitle">Impacto sostenible</span>
+              </span>
+            </button>
+
+            <UniversityBadge variant="header" />
+          </div>
 
           {user && (
             <div className="nav-actions">
@@ -86,6 +91,20 @@ export default function Layout({ children }) {
               </button>
             </div>
           )}
+
+          {/* Visitante: la portada es pública y desde acá puede entrar o registrarse. */}
+          {!isAuthenticated && (
+            <div className="nav-actions">
+              <Link className="nav-pill" to="/login">
+                <span className="material-symbols-outlined text-xl">login</span>
+                Iniciar sesión
+              </Link>
+              <Link className="nav-pill primary eco-glow-button" to="/signup">
+                <span className="material-symbols-outlined text-xl">person_add</span>
+                Crear cuenta
+              </Link>
+            </div>
+          )}
         </nav>
       </header>
 
@@ -98,15 +117,21 @@ export default function Layout({ children }) {
 
       <main className="grow">{children}</main>
 
-      <footer className="app-footer hidden md:block">
-        <div className="app-footer-inner">
+      <footer className="app-footer">
+        <div className="app-footer-inner app-footer-grid">
           <div>
             <div className="font-headline text-xl font-black tracking-tight text-primary">EcoHuella</div>
             <div className="mt-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
-              Disenando un futuro regenerativo
+              Diseñando un futuro regenerativo
             </div>
           </div>
-          <div className="text-sm text-on-surface-variant">2026 EcoHuella</div>
+
+          <UniversityBadge variant="footer" />
+
+          <div className="app-footer-meta">
+            <span>© 2026 EcoHuella</span>
+            <Link to="/terminos-y-condiciones">Términos y condiciones</Link>
+          </div>
         </div>
       </footer>
     </div>

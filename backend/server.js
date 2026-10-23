@@ -67,7 +67,7 @@ const requireDatabase = (req, res, next) => {
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
       message:
-        "La base de datos no esta conectada. Enciende MongoDB y vuelve a intentarlo.",
+        "La base de datos no está conectada. Enciende MongoDB y vuelve a intentarlo.",
     });
   }
 

@@ -44,11 +44,11 @@ export default function QuestionCard({
 
       <header className="quiz-hero animate-rise">
         <div>
-          <span className="quiz-eyebrow">Diagnostico ambiental</span>
+          <span className="quiz-eyebrow">Diagnóstico ambiental</span>
           <h1>Construyamos tu huella paso a paso.</h1>
           <p>
             Responde con aproximaciones reales. Cada respuesta ayuda a calcular
-            recomendaciones mas utiles para tu contexto.
+            recomendaciones más útiles para tu contexto.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export default function QuestionCard({
                 autoFocus
               />
               <span className="quiz-input-hint">
-                Puedes ajustar este dato mas adelante si cambia tu situacion.
+                Puedes ajustar este dato más adelante si cambia tu situación.
               </span>
             </div>
           )}
@@ -179,7 +179,7 @@ export default function QuestionCard({
           disabled={currentStep === 1 || isSaving}
         >
           <span className="material-symbols-outlined">arrow_back</span>
-          Atras
+          Atrás
         </button>
 
         <button

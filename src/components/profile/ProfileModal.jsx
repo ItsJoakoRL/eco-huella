@@ -27,7 +27,7 @@ const MAX_PROFILE_PHOTO_SIZE = 8 * 1024 * 1024;
 
 const uccuyoLevelOptions = [
   { value: "", label: "Sin definir" },
-  { value: "jardin", label: "Jardin" },
+  { value: "jardin", label: "Jardín" },
   { value: "primario", label: "Primario" },
   { value: "secundaria", label: "Secundaria" },
   { value: "universidad", label: "Universidad" },
@@ -112,7 +112,7 @@ export default function ProfileModal({ isOpen, onClose }) {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setError("Selecciona una imagen valida.");
+      setError("Selecciona una imagen válida.");
       return;
     }
 
@@ -141,7 +141,7 @@ export default function ProfileModal({ isOpen, onClose }) {
     setMessage("");
 
     if (!/^[a-zA-Z0-9_]{3,24}$/.test(formData.username)) {
-      setError("El nombre de usuario debe tener 3 a 24 caracteres y solo letras, numeros o guion bajo.");
+      setError("El nombre de usuario debe tener 3 a 24 caracteres y solo letras, números o guion bajo.");
       return;
     }
 
@@ -157,7 +157,7 @@ export default function ProfileModal({ isOpen, onClose }) {
 
     const calculatedAge = calculateAge(formData.birthDate);
     if (formData.birthDate && (calculatedAge < 0 || calculatedAge > 120)) {
-      setError("Ingresa una fecha de nacimiento valida.");
+      setError("Ingresa una fecha de nacimiento válida.");
       return;
     }
 
@@ -362,10 +362,10 @@ export default function ProfileModal({ isOpen, onClose }) {
                 <option value="">Sin definir</option>
                 <option value="learn">Aprender sobre mi impacto</option>
                 <option value="save_water">Cuidar el agua</option>
-                <option value="reduce_energy">Ahorrar energia</option>
-                <option value="eat_better">Mejorar mis habitos de alimentacion</option>
+                <option value="reduce_energy">Ahorrar energía</option>
+                <option value="eat_better">Mejorar mis hábitos de alimentación</option>
                 <option value="waste_less">Generar menos residuos</option>
-                <option value="move_better">Moverme de forma mas sustentable</option>
+                <option value="move_better">Moverme de forma más sustentable</option>
               </select>
             </label>
 
@@ -376,7 +376,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                   className="admin-input"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
-                  placeholder="Dejar vacio para no cambiarla"
+                  placeholder="Dejar vacío para no cambiarla"
                   onChange={(event) => updateField("password", event.target.value)}
                 />
                 <button

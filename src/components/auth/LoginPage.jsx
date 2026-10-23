@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authAPI } from "../../services/api";
 import Button from "../ui/Button";
+import UniversityBadge from "../ui/UniversityBadge";
 import ecoHuellaLogo from "../../assets/eco-huella-logo-generated.png";
 
 const inputClasses = "signup-input";
@@ -111,13 +112,13 @@ const LoginPage = () => {
       navigate("/dashboard");
     } catch (err) {
       if (err.response?.status === 401) {
-        setError("Usuario/Correo O Contraseña Incorrectos");
+        setError("Usuario o contraseña incorrectos");
         return;
       }
 
       setError(
         err.response?.data?.message ||
-          "No se pudo conectar con el servidor. Verifica que el backend este encendido."
+          "No se pudo conectar con el servidor. Verifica que el servidor esté encendido."
       );
     } finally {
       setIsLoading(false);
@@ -144,6 +145,7 @@ const LoginPage = () => {
                   Entra para continuar tu diagnóstico, revisar recomendaciones
                   y administrar datos si tienes permisos.
                 </p>
+                <UniversityBadge variant="aside" />
               </div>
 
               <div className="login-insight-grid">
@@ -168,7 +170,7 @@ const LoginPage = () => {
                 <h2>Iniciar sesión</h2>
               </div>
               <Link to="/signup" className="signup-login-link">
-                No tienes cuenta?
+                ¿No tienes cuenta?
               </Link>
             </div>
 
@@ -262,7 +264,7 @@ const LoginPage = () => {
                   Mantenerme conectado
                 </label>
                 <button type="button" className="login-forgot" onClick={openRecovery}>
-                  Olvidaste tu contraseña?
+                  ¿Olvidaste tu contraseña?
                 </button>
               </div>
 
@@ -285,7 +287,7 @@ const LoginPage = () => {
               type="button"
               className="recovery-close"
               onClick={closeRecovery}
-              aria-label="Cerrar recuperacion"
+              aria-label="Cerrar recuperación"
             >
               <span className="material-symbols-outlined">close</span>
             </button>

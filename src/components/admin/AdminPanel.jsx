@@ -14,13 +14,13 @@ const tabs = [
     id: "questions",
     label: "Preguntas",
     icon: "quiz",
-    description: "Cuestionario y orden del diagnostico",
+    description: "Cuestionario y orden del diagnóstico",
   },
   {
     id: "parameters",
-    label: "Parametros",
+    label: "Parámetros",
     icon: "tune",
-    description: "Factores de emision por categoria",
+    description: "Factores de emisión por categoría",
   },
 ];
 
@@ -55,10 +55,10 @@ const AdminPanel = () => {
       <section className="admin-hero animate-rise">
         <div>
           <span className="admin-eyebrow">Centro de control</span>
-          <h1>Panel de Administracion</h1>
+          <h1>Panel de Administración</h1>
           <p>
-            Ajusta usuarios, preguntas y parametros desde una vista mas clara,
-            rapida y preparada para trabajar sin perder contexto.
+            Ajusta usuarios, preguntas y parámetros desde una vista más clara,
+            rápida y preparada para trabajar sin perder contexto.
           </p>
         </div>
 
@@ -74,7 +74,7 @@ const AdminPanel = () => {
       </section>
 
       <div className="admin-toolbar animate-pop">
-        <nav className="admin-tabs" aria-label="Secciones de administracion">
+        <nav className="admin-tabs" aria-label="Secciones de administración">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -93,7 +93,7 @@ const AdminPanel = () => {
           className="admin-refresh-button"
           onClick={refreshPanel}
           title="Actualizar panel"
-          aria-label="Actualizar panel de administracion"
+          aria-label="Actualizar panel de administración"
         >
           <span className="material-symbols-outlined">refresh</span>
           <span>Actualizar</span>

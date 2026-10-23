@@ -6,7 +6,7 @@ const categories = ["housing", "transport", "food", "waste"];
 const categoryLabels = {
   housing: "Hogar",
   transport: "Transporte",
-  food: "Alimentacion",
+  food: "Alimentación",
   waste: "Residuos",
 };
 
@@ -33,7 +33,7 @@ const ParameterManagement = () => {
       }
       setError("");
     } catch (err) {
-      setError("No se pudieron cargar los parametros.");
+      setError("No se pudieron cargar los parámetros.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -60,7 +60,7 @@ const ParameterManagement = () => {
       setEditingCategory(null);
       loadParameters();
     } catch (err) {
-      setError("No se pudieron actualizar los parametros.");
+      setError("No se pudieron actualizar los parámetros.");
       console.error(err);
     }
   };
@@ -75,18 +75,24 @@ const ParameterManagement = () => {
         <span className="material-symbols-outlined animate-pulse-soft">
           progress_activity
         </span>
-        Cargando parametros...
+        Cargando parámetros...
       </div>
     );
   }
 
   if (!parameters) {
     return (
-      <div className="admin-card admin-empty">
-        <span className="material-symbols-outlined">database_off</span>
-        <h3>No hay parametros disponibles</h3>
-        <p>Cuando se carguen en la base de datos apareceran aca.</p>
-      </div>
+      <>
+        <div className="admin-alert admin-note">
+          Aviso: por ahora el cálculo usa los factores de un archivo del sistema. Los valores que
+          guardes acá quedan registrados, pero todavía no cambian los resultados de los usuarios.
+        </div>
+        <div className="admin-card admin-empty">
+          <span className="material-symbols-outlined">database_off</span>
+          <h3>No hay parámetros disponibles</h3>
+          <p>Cuando se carguen en la base de datos aparecerán acá.</p>
+        </div>
+      </>
     );
   }
 
@@ -94,12 +100,17 @@ const ParameterManagement = () => {
     <div className="admin-section">
       <header className="admin-section-head">
         <div>
-          <span className="admin-kicker">Modelo de calculo</span>
-          <h2>Parametros de emision</h2>
-          <p>Ajusta los factores que alimentan el resultado final del usuario.</p>
+          <span className="admin-kicker">Modelo de cálculo</span>
+          <h2>Parámetros de emisión</h2>
+          <p>Ajusta los factores del modelo de emisiones por categoría.</p>
         </div>
-        <span className="admin-count">{categories.length} categorias</span>
+        <span className="admin-count">{categories.length} categorías</span>
       </header>
+
+      <div className="admin-alert admin-note">
+        Aviso: por ahora el cálculo usa los factores de un archivo del sistema. Los valores que
+        guardes acá quedan registrados, pero todavía no cambian los resultados de los usuarios.
+      </div>
 
       {error && <div className="admin-alert">{error}</div>}
 
@@ -111,7 +122,7 @@ const ParameterManagement = () => {
             </span>
             <div>
               <h3>Editar {categoryLabels[editingCategory]}</h3>
-              <p>Modifica cada factor y guarda para recalcular nuevos resultados.</p>
+              <p>Modifica cada factor y guarda los cambios.</p>
             </div>
           </div>
 

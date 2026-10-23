@@ -143,14 +143,14 @@ export const login = async (req, res) => {
     if (!user) {
       return res
         .status(401)
-        .json({ message: "Usuario/Correo O Contraseña Incorrectos" });
+        .json({ message: "Usuario o contraseña incorrectos" });
     }
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res
         .status(401)
-        .json({ message: "Usuario/Correo O Contraseña Incorrectos" });
+        .json({ message: "Usuario o contraseña incorrectos" });
     }
 
     const token = generateToken(user._id, user.role);
@@ -218,14 +218,14 @@ export const updateProfile = async (req, res) => {
     if (duplicateUser) {
       const message =
         duplicateUser.email === normalizedEmail
-          ? "El email ya esta registrado"
-          : "El nombre de usuario ya esta registrado";
+          ? "El email ya está registrado"
+          : "El nombre de usuario ya está registrado";
       return res.status(400).json({ message });
     }
 
     if (password && password.length < 6) {
       return res.status(400).json({
-        message: "La contrasena debe tener al menos 6 caracteres",
+        message: "La contraseña debe tener al menos 6 caracteres",
       });
     }
 
@@ -330,7 +330,7 @@ export const resetPassword = async (req, res) => {
 
     if (!registeredEmail || typeof token !== "string" || typeof password !== "string" || !token || !password) {
       return res.status(400).json({
-        message: "Por favor proporciona el correo, el codigo y la nueva contrasena",
+        message: "Por favor proporciona el correo, el código y la nueva contraseña",
       });
     }
 
