@@ -33,8 +33,9 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "")
 app.use(cors(allowedOrigins.length ? { origin: allowedOrigins } : undefined));
 
 // Detrás del proxy de Render, sin esto todos los usuarios compartirían la misma IP
-// y el límite de intentos bloquearía a todos a la vez.
-if (process.env.NODE_ENV === "production") {
+// y el límite de intentos bloquearía a todos a la vez. Render define RENDER=true en
+// todos sus servicios, así que no depende de que NODE_ENV esté bien configurado.
+if (process.env.NODE_ENV === "production" || process.env.RENDER === "true") {
   app.set("trust proxy", 1);
 }
 
