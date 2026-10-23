@@ -89,13 +89,14 @@ node seed.js
 ```
 
 Esto creará:
-- Admin: admin@eco-huella.com / admin123456
-- Usuario Test: user@eco-huella.com / user123456
+- Admin: admin@eco-huella.com
+- Usuario Test: user@eco-huella.com
+
+Las contraseñas se generan al azar y el script las muestra una sola vez al terminar. Para fijarlas, define `SEED_ADMIN_PASSWORD` y `SEED_USER_PASSWORD` antes de correrlo.
 - Preguntas de ejemplo
 - Parámetros de emisión por defecto
 
-> **Atención:** el script **borra** usuarios, preguntas y parámetros. Si la base ya tiene usuarios se niega a continuar; para forzarlo usa `node seed.js --force`. Las contraseñas de prueba se pueden cambiar con las variables `SEED_ADMIN_PASSWORD` y `SEED_USER_PASSWORD`.
-
+> **Atención:** el script **borra** usuarios, preguntas y parámetros. Si la base ya tiene usuarios se niega a continuar; para forzarlo usa `node seed.js --force`.
 ## Ejecución
 
 ### Opcion recomendada - Frontend y backend juntos

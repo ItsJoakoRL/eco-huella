@@ -1,3 +1,4 @@
+import { handleError } from "../utils/httpError.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -45,7 +46,9 @@ export const signup = async (req, res) => {
       avatarOffsetY,
     } = req.body;
 
-    if (!name || !username || !email || !password) {
+    if (
+      [name, username, email, password].some((value) => typeof value !== "string" || !value)
+    ) {
       return res.status(400).json({
         message: "Por favor proporciona nombre, usuario, email y contraseña",
       });
@@ -112,7 +115,7 @@ export const signup = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -120,7 +123,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
       return res.status(400).json({
         message: "Por favor proporciona usuario/email y contraseña",
       });
@@ -171,7 +174,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -207,7 +210,7 @@ export const getProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -293,6 +296,9 @@ export const updateProfile = async (req, res) => {
 
     res.status(200).json({
       message: "Perfil actualizado exitosamente",
+      // Cambiar la contraseña invalida los tokens anteriores, incluido el de esta
+      // sesión: se entrega uno nuevo para no sacar al usuario de la app.
+      ...(password && { token: generateToken(user._id, user.role) }),
       user: {
         id: user._id,
         name: user.name,
@@ -316,14 +322,14 @@ export const updateProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const registeredEmail = email?.trim().toLowerCase();
+    const registeredEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
     if (!registeredEmail) {
       return res.status(400).json({
@@ -352,32 +358,34 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordAttempts = 0;
 
     await user.save({ validateBeforeSave: false });
-    await withTimeout(
+
+    // El correo se envía en segundo plano: la respuesta tarda lo mismo exista o no
+    // la cuenta, y si el envío falla el cliente no se entera (eso delataría que el
+    // email está registrado); el motivo queda en el log del servidor.
+    withTimeout(
       sendPasswordResetCode({
         to: user.email,
         name: user.name,
         code: resetToken,
       }),
       15000,
-      "El correo tardo demasiado en enviarse. Revisa la configuracion de Gmail e intenta de nuevo."
-    );
+      "El correo tardó demasiado en enviarse. Revisa la configuración del servicio de correo."
+    ).catch((error) => {
+      console.error("No se pudo enviar el código de recuperación:", error.message);
+    });
 
     res.status(200).json(genericResponse);
   } catch (error) {
-    res.status(500).json({
-      message:
-        error.message ||
-        "No se pudo enviar el código de recuperación al correo registrado",
-    });
+    handleError(res, error);
   }
 };
 
 export const resetPassword = async (req, res) => {
   try {
     const { email, token, password } = req.body;
-    const registeredEmail = email?.trim().toLowerCase();
+    const registeredEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    if (!registeredEmail || !token || !password) {
+    if (!registeredEmail || typeof token !== "string" || typeof password !== "string" || !token || !password) {
       return res.status(400).json({
         message: "Por favor proporciona el correo, el codigo y la nueva contrasena",
       });
@@ -429,6 +437,6 @@ export const resetPassword = async (req, res) => {
       message: "Contraseña actualizada correctamente",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };

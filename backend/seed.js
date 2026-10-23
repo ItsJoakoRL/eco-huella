@@ -1,10 +1,18 @@
 import dotenv from "dotenv";
+import crypto from "crypto";
 import User from "./models/User.js";
 import Question from "./models/Question.js";
 import EmissionParameter from "./models/EmissionParameter.js";
 import connectDB from "./config/database.js";
 
 dotenv.config();
+
+// Sin contraseña definida por variable de entorno se genera una al azar y se muestra
+// una sola vez al final: nunca queda una contraseña conocida de administrador.
+const adminPassword =
+  process.env.SEED_ADMIN_PASSWORD || crypto.randomBytes(9).toString("base64url");
+const userPassword =
+  process.env.SEED_USER_PASSWORD || crypto.randomBytes(9).toString("base64url");
 
 const seedDatabase = async () => {
   try {
@@ -30,7 +38,7 @@ const seedDatabase = async () => {
       name: "Admin Eco-Huella",
       username: "admin",
       email: "admin@eco-huella.com",
-      password: process.env.SEED_ADMIN_PASSWORD || "admin123456",
+      password: adminPassword,
       role: "admin",
       age: 34,
       birthDate: "1991-01-01",
@@ -49,7 +57,7 @@ const seedDatabase = async () => {
       name: "Usuario Test",
       username: "usuario_test",
       email: "user@eco-huella.com",
-      password: process.env.SEED_USER_PASSWORD || "user123456",
+      password: userPassword,
       role: "user",
       age: 24,
       birthDate: "2001-01-01",
@@ -169,10 +177,11 @@ const seedDatabase = async () => {
     console.log("\nCredenciales de prueba:");
     console.log("Admin:");
     console.log("  Email: admin@eco-huella.com");
-    console.log("  Contraseña: admin123456");
+    console.log(`  Contraseña: ${adminPassword}`);
     console.log("\nUsuario:");
     console.log("  Email: user@eco-huella.com");
-    console.log("  Contraseña: user123456");
+    console.log(`  Contraseña: ${userPassword}`);
+    console.log("\nGuarda estas contraseñas: no se vuelven a mostrar.");
 
     process.exit(0);
   } catch (error) {

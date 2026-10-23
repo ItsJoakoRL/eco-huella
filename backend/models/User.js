@@ -116,6 +116,11 @@ const userSchema = new mongoose.Schema(
       default: 0,
       select: false,
     },
+    // Los tokens emitidos antes de esta fecha dejan de valer (ver middleware/auth).
+    passwordChangedAt: {
+      type: Date,
+      select: false,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -134,6 +139,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
+    if (!this.isNew) this.passwordChangedAt = new Date();
     const salt = await bcryptjs.genSalt(10);
     this.password = await bcryptjs.hash(this.password, salt);
     next();

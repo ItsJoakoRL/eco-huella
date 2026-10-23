@@ -1,3 +1,4 @@
+import { handleError } from "../utils/httpError.js";
 import QuizResult from "../models/QuizResult.js";
 
 export const getMyResults = async (req, res) => {
@@ -11,7 +12,7 @@ export const getMyResults = async (req, res) => {
       results,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -30,21 +31,34 @@ export const getResultById = async (req, res) => {
 
     res.status(200).json({ result });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
+
+// Debe coincidir con los recorridos de src/data/surveyTracks.js. Se valida para que
+// nadie invente tipos nuevos y eluda el límite de una encuesta de cada tipo.
+const SURVEY_TYPES = ["ambiental", "agua", "desayuno"];
+
+const isPlainObject = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+
+const ALREADY_COMPLETED = { message: "Esta encuesta ya fue completada por este usuario" };
 
 export const saveQuizResult = async (req, res) => {
   try {
     const { answers, results, metadata } = req.body;
 
-    if (!answers || !results) {
+    if (!isPlainObject(answers) || !isPlainObject(results)) {
       return res.status(400).json({
         message: "answers y results son requeridos",
       });
     }
 
     const surveyType = metadata?.survey_type || answers?._surveyType || "ambiental";
+    if (!SURVEY_TYPES.includes(surveyType)) {
+      return res.status(400).json({ message: "Tipo de encuesta inválido" });
+    }
+
     const existingResult = await QuizResult.findOne({
       userId: req.userId,
       $or: [
@@ -54,9 +68,7 @@ export const saveQuizResult = async (req, res) => {
     });
 
     if (existingResult) {
-      return res.status(409).json({
-        message: "Esta encuesta ya fue completada por este usuario",
-      });
+      return res.status(409).json(ALREADY_COMPLETED);
     }
 
     const quizResult = await QuizResult.create({
@@ -72,7 +84,12 @@ export const saveQuizResult = async (req, res) => {
       result: quizResult,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Dos envíos simultáneos pasan la comprobación de arriba; el índice único de
+    // (usuario, tipo de encuesta) frena al segundo.
+    if (error?.code === 11000) {
+      return res.status(409).json(ALREADY_COMPLETED);
+    }
+    handleError(res, error);
   }
 };
 
@@ -91,10 +108,18 @@ export const updateQuizResult = async (req, res) => {
 
     // Solo se aceptan estos campos: evita reasignar el dueño (userId) o tocar _id.
     const { answers, results, metadata } = req.body;
+    if ([answers, results, metadata].some((value) => value !== undefined && !isPlainObject(value))) {
+      return res.status(400).json({ message: "answers, results y metadata deben ser objetos" });
+    }
+
+    // El tipo de encuesta no se puede cambiar: sería la forma de volver a responder
+    // la misma encuesta pasándola por otro tipo.
+    const surveyType =
+      result.metadata?.survey_type || result.answers?.get("_surveyType") || "ambiental";
     const updates = {};
-    if (answers !== undefined) updates.answers = answers;
+    if (answers !== undefined) updates.answers = { ...answers, _surveyType: surveyType };
     if (results !== undefined) updates.results = results;
-    if (metadata !== undefined) updates.metadata = metadata;
+    if (metadata !== undefined) updates.metadata = { ...metadata, survey_type: surveyType };
 
     result = await QuizResult.findByIdAndUpdate(
       req.params.id,
@@ -107,7 +132,7 @@ export const updateQuizResult = async (req, res) => {
       result,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -130,7 +155,7 @@ export const deleteQuizResult = async (req, res) => {
       message: "Resultado eliminado exitosamente",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -146,6 +171,6 @@ export const getAllResults = async (req, res) => {
       results,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };

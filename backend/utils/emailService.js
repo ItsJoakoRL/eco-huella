@@ -5,13 +5,19 @@ const lookupIPv4 = (hostname, options, callback) => {
   dns.lookup(hostname, { ...options, family: 4 }, callback);
 };
 
+const escapeHtml = (value) =>
+  String(value ?? "").replace(
+    /[&<>"']/g,
+    (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]
+  );
+
 const buildPasswordResetEmail = ({ name, code }) => ({
   subject: "Código de recuperación de EcoHuella",
   text: `Hola ${name || ""}. Tu código de recuperación de EcoHuella es ${code}. Expira en 15 minutos.`,
   html: `
     <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; color: #1f2937;">
       <h1 style="color: #16623f;">EcoHuella</h1>
-      <p>Hola ${name || ""}, recibimos una solicitud para cambiar tu contraseña.</p>
+      <p>Hola ${escapeHtml(name)}, recibimos una solicitud para cambiar tu contraseña.</p>
       <p style="font-size: 14px; color: #4b5563;">Usa este código de 6 dígitos:</p>
       <div style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #16623f; padding: 18px 22px; background: #d9f7eb; border-radius: 16px; text-align: center;">
         ${code}

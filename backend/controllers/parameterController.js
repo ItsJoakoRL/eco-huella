@@ -1,3 +1,4 @@
+import { handleError } from "../utils/httpError.js";
 import EmissionParameter from "../models/EmissionParameter.js";
 
 export const getAllParameters = async (req, res) => {
@@ -8,7 +9,7 @@ export const getAllParameters = async (req, res) => {
       parameters,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -23,7 +24,7 @@ export const getParametersByCategory = async (req, res) => {
 
     res.status(200).json({ parameters });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -45,7 +46,7 @@ export const updateParameters = async (req, res) => {
       parameters,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -57,6 +58,6 @@ export const createParameters = async (req, res) => {
       parameters,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };

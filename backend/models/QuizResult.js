@@ -37,4 +37,14 @@ const quizResultSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Una encuesta de cada tipo por usuario. Parcial para ignorar resultados viejos que
+// no guardaron metadata.survey_type.
+quizResultSchema.index(
+  { userId: 1, "metadata.survey_type": 1 },
+  {
+    unique: true,
+    partialFilterExpression: { "metadata.survey_type": { $type: "string" } },
+  }
+);
+
 export default mongoose.model("QuizResult", quizResultSchema);

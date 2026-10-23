@@ -1,4 +1,6 @@
+import { handleError } from "../utils/httpError.js";
 import User from "../models/User.js";
+import QuizResult from "../models/QuizResult.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -8,7 +10,7 @@ export const getAllUsers = async (req, res) => {
       users,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -22,7 +24,7 @@ export const getUserById = async (req, res) => {
 
     res.status(200).json({ user });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -119,7 +121,7 @@ export const updateUser = async (req, res) => {
       return res.status(400).json({ message });
     }
 
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -137,11 +139,14 @@ export const deleteUser = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
+    // Sin cuenta no tiene sentido conservar sus encuestas: quedarían huérfanas.
+    await QuizResult.deleteMany({ userId: user._id });
+
     res.status(200).json({
       message: "Usuario eliminado exitosamente",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -174,6 +179,6 @@ export const changeUserRole = async (req, res) => {
       user,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };

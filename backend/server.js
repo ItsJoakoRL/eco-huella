@@ -31,7 +31,19 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 app.use(cors(allowedOrigins.length ? { origin: allowedOrigins } : undefined));
-app.use(express.json({ limit: "14mb" }));
+
+// Detrás del proxy de Render, sin esto todos los usuarios compartirían la misma IP
+// y el límite de intentos bloquearía a todos a la vez.
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+// Límite chico para todo; PUT /api/auth/profile (foto de perfil) lo amplía en su ruta.
+const jsonParser = express.json({ limit: "100kb" });
+app.use((req, res, next) => {
+  if (req.method === "PUT" && req.path === "/api/auth/profile") return next();
+  return jsonParser(req, res, next);
+});
 
 // Health check
 app.get("/", (req, res) => {
@@ -79,6 +91,13 @@ app.use("*", (req, res) => {
 
 // Error handler
 app.use((err, req, res, _next) => {
+  if (err.type === "entity.too.large") {
+    return res.status(413).json({ message: "El contenido enviado es demasiado grande" });
+  }
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ message: "La solicitud no tiene un formato válido" });
+  }
+
   console.error(err.stack);
   res.status(500).json({ message: "Error interno del servidor" });
 });

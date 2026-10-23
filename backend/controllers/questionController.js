@@ -1,3 +1,4 @@
+import { handleError } from "../utils/httpError.js";
 import Question from "../models/Question.js";
 
 export const getAllQuestions = async (req, res) => {
@@ -14,7 +15,7 @@ export const getAllQuestions = async (req, res) => {
       questions,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -26,7 +27,7 @@ export const getQuestionById = async (req, res) => {
     }
     res.status(200).json({ question });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -51,7 +52,7 @@ export const createQuestion = async (req, res) => {
       question,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -72,7 +73,7 @@ export const updateQuestion = async (req, res) => {
       question,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
 
@@ -88,6 +89,6 @@ export const deleteQuestion = async (req, res) => {
       message: "Pregunta eliminada exitosamente",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    handleError(res, error);
   }
 };
