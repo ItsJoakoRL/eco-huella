@@ -24,6 +24,8 @@ export default function QuizController({ onFinish, onCancel }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isCheckingCompletion, setIsCheckingCompletion] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -70,20 +72,39 @@ export default function QuizController({ onFinish, onCancel }) {
   };
 
   const handleNext = async () => {
+    if (isSaving) return;
+
     if (currentIndex < allQuestions.length - 1) {
       setCurrentIndex(currentIndex + 1);
       return;
     }
 
     const answersWithTrack = { ...answers, _surveyType: track.id };
-    saveQuizAttempt(user, answersWithTrack);
+    setSaveError("");
+    setIsSaving(true);
 
+    // Primero se guarda en la cuenta: si se marcara como completada solo en este
+    // navegador y el guardado fallara, la encuesta quedaría bloqueada y sin datos
+    // en el servidor. Si falla, las respuestas se conservan para reintentar.
     try {
       await quizResultsAPI.save(buildQuizResultPayload(answers, track.id));
+      saveQuizAttempt(user, answersWithTrack);
     } catch (error) {
-      console.error("No se pudo guardar el resultado en la cuenta:", error);
+      // 409: ya estaba guardada (otro dispositivo o un envío anterior); se sigue igual.
+      if (error.response?.status !== 409) {
+        console.error("No se pudo guardar el resultado en la cuenta:", error);
+        const status = error.response?.status;
+        setSaveError(
+          status && status < 500 && error.response.data?.message
+            ? error.response.data.message
+            : "No pudimos guardar tu encuesta en tu cuenta. Revisa tu conexión y vuelve a intentarlo: tus respuestas siguen acá."
+        );
+        setIsSaving(false);
+        return;
+      }
     }
 
+    setIsSaving(false);
     clearLegacyQuizAnswers();
     if (onFinish) {
       onFinish(answersWithTrack);
@@ -144,6 +165,8 @@ export default function QuizController({ onFinish, onCancel }) {
       onPrev={handlePrev}
       onClose={handleCancel}
       closeHref={closeHref}
+      error={saveError}
+      isSaving={isSaving}
     />
   );
 }

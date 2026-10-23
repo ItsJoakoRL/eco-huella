@@ -37,12 +37,16 @@ export const AuthProvider = ({ children }) => {
   // true mientras se confirma con el servidor una sesión guardada: evita redirigir
   // (a términos o al dashboard) antes de saber quién es el usuario.
   const [checkingAuth, setCheckingAuth] = useState(() => Boolean(localStorage.getItem("token")));
+  // true si no se pudo confirmar la sesión por un problema de red o del servidor (no
+  // porque el token sea inválido): la sesión se conserva y se puede reintentar.
+  const [connectionError, setConnectionError] = useState(false);
   const [error, setError] = useState(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsPending, setTermsPending] = useState(false);
 
   // Verificar si el usuario está autenticado al cargar
   async function checkAuth() {
+    setConnectionError(false);
     try {
       const response = await authAPI.getProfile();
       setUser(response.data.user);
@@ -50,13 +54,26 @@ export const AuthProvider = ({ children }) => {
       setTermsPending(hasPendingTerms(response.data.user));
     } catch (err) {
       console.error("Error al verificar autenticación:", err);
-      setToken(null);
-      setTermsAccepted(false);
-      setTermsPending(false);
-      localStorage.removeItem("token");
+      const status = err.response?.status;
+      if (status === 401 || status === 404) {
+        // El servidor respondió y la sesión no vale (token vencido o cuenta borrada).
+        setToken(null);
+        setTermsAccepted(false);
+        setTermsPending(false);
+        localStorage.removeItem("token");
+      } else {
+        // Sin respuesta (red caída, servidor arrancando) o error del servidor: la
+        // sesión puede ser válida, así que no se cierra.
+        setConnectionError(true);
+      }
     } finally {
       setCheckingAuth(false);
     }
+  };
+
+  const retryAuth = () => {
+    setCheckingAuth(true);
+    checkAuth();
   };
 
   const signup = async (name, email, password, profile = {}) => {
@@ -122,6 +139,20 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  // El cliente HTTP avisa con este evento cuando el servidor rechaza el token en
+  // mitad de la sesión (venció, cambiaron la contraseña, borraron la cuenta).
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setUser(null);
+      setToken(null);
+      setTermsAccepted(false);
+      setTermsPending(false);
+    };
+
+    window.addEventListener("auth:expired", handleSessionExpired);
+    return () => window.removeEventListener("auth:expired", handleSessionExpired);
+  }, []);
+
   const acceptTerms = () => {
     const userId = getUserId(user);
     if (!userId) return;
@@ -152,6 +183,11 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       const response = await authAPI.updateProfile(profileData);
+      if (response.data.token) {
+        // Al cambiar la contraseña el servidor invalida el token viejo y manda uno nuevo.
+        localStorage.setItem("token", response.data.token);
+        setToken(response.data.token);
+      }
       setUser(response.data.user);
       return response.data;
     } catch (err) {
@@ -169,6 +205,8 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     checkingAuth,
+    connectionError,
+    retryAuth,
     isAuthenticated: !!token,
     isAdmin: user?.role === "admin",
     termsAccepted,

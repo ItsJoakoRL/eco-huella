@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 const moduleIcons = {
   Hogar: "home",
   Agua: "water_drop",
@@ -21,10 +23,20 @@ export default function QuestionCard({
   onPrev,
   onClose,
   closeHref = "/",
+  error = "",
+  isSaving = false,
 }) {
   const progressPercentage = Math.round((currentStep / totalSteps) * 100);
   const moduleIcon = moduleIcons[moduleLabel] || "eco";
   const isLastStep = currentStep === totalSteps;
+
+  // El deslizador muestra su valor mínimo como si fuera una respuesta: se registra
+  // para que "Siguiente" no quede deshabilitado hasta mover el control (y volver).
+  useEffect(() => {
+    if (question.type === "range" && selectedValue === undefined) {
+      onSelect(String(question.min ?? 0));
+    }
+  }, [question.id, question.type, question.min, selectedValue, onSelect]);
 
   return (
     <section className="quiz-page">
@@ -153,12 +165,18 @@ export default function QuestionCard({
         </section>
       </article>
 
+      {error && (
+        <p className="profile-alert error" role="alert">
+          {error}
+        </p>
+      )}
+
       <footer className="quiz-actions">
         <button
           type="button"
           className="quiz-secondary"
           onClick={onPrev}
-          disabled={currentStep === 1}
+          disabled={currentStep === 1 || isSaving}
         >
           <span className="material-symbols-outlined">arrow_back</span>
           Atras
@@ -168,11 +186,11 @@ export default function QuestionCard({
           type="button"
           className="quiz-primary eco-glow-button"
           onClick={onNext}
-          disabled={!selectedValue}
+          disabled={!selectedValue || isSaving}
         >
-          {isLastStep ? "Ver resultados" : "Siguiente"}
+          {isSaving ? "Guardando..." : isLastStep ? "Ver resultados" : "Siguiente"}
           <span className="material-symbols-outlined">
-            {isLastStep ? "monitoring" : "arrow_forward"}
+            {isSaving ? "progress_activity" : isLastStep ? "monitoring" : "arrow_forward"}
           </span>
         </button>
       </footer>

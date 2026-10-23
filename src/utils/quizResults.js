@@ -13,7 +13,14 @@ export const calculateQuizResults = (answersData = {}) => {
     return question.options?.find((option) => option.label === answersData[questionId]) || null;
   };
 
-  const getNumber = (questionId, defaultVal = 0) => Number(answersData[questionId]) || defaultVal;
+  // Un 0 es una respuesta válida (p. ej. 0 km por semana): solo se usa el valor por
+  // defecto si la pregunta no se respondió. Los negativos se tratan como 0.
+  const getNumber = (questionId, defaultVal = 0) => {
+    const rawValue = answersData[questionId];
+    if (rawValue === undefined || rawValue === null || rawValue === "") return defaultVal;
+    const parsedValue = Number(rawValue);
+    return Number.isFinite(parsedValue) ? Math.max(0, parsedValue) : defaultVal;
+  };
   const hasAmbiental = hasAnyAnswer(answersData, [
     "h_personas",
     "h_electricidad",
@@ -90,9 +97,12 @@ export const calculateQuizResults = (answersData = {}) => {
   const aguaLitros = (lavarropasSemanal * 70 + riegoSemanal * 100 + autoSemanal * 200) * 52;
 
   const totalKg = hogarKg + transporteKg + comidaKg + residuosKg;
-  const totalTon = (totalKg / 1000).toFixed(1);
-  const diffAvg = totalKg ? (((totalTon - 4.7) / 4.7) * 100).toFixed(0) : 0;
-  const planetas = totalKg ? (totalTon / 1.5).toFixed(1) : 0;
+  // El porcentaje y los planetas se calculan con el total sin redondear; redondear
+  // antes a 1 decimal los desviaba (p. ej. 4,74 t se tomaba como 4,7 t = 0 %).
+  const totalTonExact = totalKg / 1000;
+  const totalTon = totalTonExact.toFixed(1);
+  const diffAvg = totalKg ? (((totalTonExact - 4.7) / 4.7) * 100).toFixed(0) : 0;
+  const planetas = totalKg ? (totalTonExact / 1.5).toFixed(1) : 0;
 
   return {
     surveyType,

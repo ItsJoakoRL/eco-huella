@@ -19,6 +19,32 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Estos endpoints responden 401 por credenciales incorrectas, no por sesión vencida.
+const PUBLIC_AUTH_PATHS = [
+  "/auth/login",
+  "/auth/signup",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+];
+
+// Si el servidor rechaza el token en mitad de la sesión, se descarta y se avisa a la
+// app (AuthContext) para que lleve al login en vez de seguir fallando en silencio.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const requestUrl = error.config?.url || "";
+    const sentToken = Boolean(error.config?.headers?.Authorization);
+    const isPublicAuthRequest = PUBLIC_AUTH_PATHS.some((path) => requestUrl.startsWith(path));
+
+    if (error.response?.status === 401 && sentToken && !isPublicAuthRequest) {
+      localStorage.removeItem("token");
+      window.dispatchEvent(new Event("auth:expired"));
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // Auth APIs
 export const authAPI = {
   signup: (data) => api.post("/auth/signup", data),
