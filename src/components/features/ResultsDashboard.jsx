@@ -432,6 +432,7 @@ export default function ResultsDashboard({ answers, onRestart }) {
                 onClick={() => setSelectedAttempt(attempt)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
                     setSelectedAttempt(attempt);
                   }
                 }}

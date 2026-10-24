@@ -146,7 +146,7 @@ const UserManagement = () => {
       setPendingDeleteUser(null);
       loadUsers();
     } catch (err) {
-      setError("No se pudo eliminar el usuario.");
+      setError(err.response?.data?.message || "No se pudo eliminar el usuario.");
       console.error(err);
     }
   };
@@ -178,7 +178,7 @@ const UserManagement = () => {
       await usersAPI.changeRole(id, newRole);
       loadUsers();
     } catch (err) {
-      setError("No se pudo cambiar el rol.");
+      setError(err.response?.data?.message || "No se pudo cambiar el rol.");
       console.error(err);
     }
   };

@@ -4968,6 +4968,38 @@ html {
   }
 }
 
+/* --- Perfil: ajustes de la foto plegados --- */
+.profile-photo-adjust {
+  width: 100%;
+}
+
+.profile-photo-adjust summary {
+  width: fit-content;
+  margin: 6px auto 0;
+  padding: 7px 16px;
+  border-radius: 999px;
+  color: #195847;
+  background: rgba(41, 102, 84, 0.1);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 160ms ease;
+}
+
+.profile-photo-adjust summary:hover {
+  background: rgba(41, 102, 84, 0.18);
+}
+
+.profile-photo-adjust summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-photo-adjust[open] summary {
+  margin-bottom: 4px;
+}
+
 /* --- Términos: escudo arriba --- */
 .terms-uni {
   display: flex;

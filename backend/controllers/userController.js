@@ -8,7 +8,8 @@ const ADMIN_RESET_CODE_MINUTES = 60;
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    // Sin las fotos: el listado no las muestra y cada una puede pesar cientos de KB.
+    const users = await User.find().select("-password -avatarUrl");
     res.status(200).json({
       count: users.length,
       users,

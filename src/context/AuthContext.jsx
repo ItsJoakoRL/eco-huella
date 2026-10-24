@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { authAPI } from "../services/api";
 import { clearLegacyQuizAnswers, clearQuizAnswers } from "../utils/quizStorage";
 import { TERMS_VERSION } from "../../backend/shared/terms";
+import { HEAVY_AVATAR_CHARS, compressAvatarUrl } from "../utils/imageTools";
 
 const AuthContext = createContext();
 
@@ -102,6 +103,26 @@ export const AuthProvider = ({ children }) => {
       checkAuth();
     }
   }, [token]);
+
+  // Las fotos de perfil guardadas antes de que se achicaran al subirlas pueden pesar varios MB
+  // y viajan en cada login y carga de la app: se vuelven a guardar livianas, una vez por sesión.
+  const avatarUrl = user?.avatarUrl;
+  useEffect(() => {
+    if (!avatarUrl || avatarUrl.length < HEAVY_AVATAR_CHARS || !avatarUrl.startsWith("data:image/")) return;
+    if (sessionStorage.getItem("ecohuella_avatar_slimmed")) return;
+    sessionStorage.setItem("ecohuella_avatar_slimmed", "1");
+
+    (async () => {
+      try {
+        const slim = await compressAvatarUrl(avatarUrl);
+        if (slim.length >= avatarUrl.length) return;
+        const response = await authAPI.updateProfile({ avatarUrl: slim });
+        setUser(response.data.user);
+      } catch (err) {
+        console.error("No se pudo achicar la foto de perfil:", err);
+      }
+    })();
+  }, [avatarUrl]);
 
   // El cliente HTTP avisa con este evento cuando el servidor rechaza el token en
   // mitad de la sesión (venció, cambiaron la contraseña, borraron la cuenta).

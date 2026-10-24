@@ -8,6 +8,16 @@ import { generateResetCode, hashResetCode } from "../utils/resetCode.js";
 
 const MAX_RESET_ATTEMPTS = 5;
 
+// La foto de perfil es una imagen en base64 que el navegador ya achicó (unos 100 KB).
+// Se acepta solo ese formato y con tope de tamaño: viaja en cada login y carga de la app.
+const MAX_AVATAR_CHARS = 1_500_000;
+const AVATAR_DATA_URL = /^data:image\/(?:png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+const isValidAvatar = (value) =>
+  value === undefined ||
+  value === "" ||
+  (typeof value === "string" && value.length <= MAX_AVATAR_CHARS && AVATAR_DATA_URL.test(value));
+const INVALID_AVATAR_MESSAGE = "La foto de perfil no es válida o es demasiado pesada.";
+
 const generateToken = (userId, role) => {
   return jwt.sign(
     { userId, role },
@@ -79,6 +89,10 @@ export const signup = async (req, res) => {
       return res.status(400).json({
         message: "Por favor proporciona nombre, usuario, email y contraseña",
       });
+    }
+
+    if (!isValidAvatar(avatarUrl)) {
+      return res.status(400).json({ message: INVALID_AVATAR_MESSAGE });
     }
 
     const normalizedEmail = email.toLowerCase();
@@ -202,6 +216,10 @@ export const updateProfile = async (req, res) => {
       avatarOffsetY,
       password,
     } = req.body;
+    if (!isValidAvatar(avatarUrl)) {
+      return res.status(400).json({ message: INVALID_AVATAR_MESSAGE });
+    }
+
     const normalizedEmail = email?.toLowerCase();
     const normalizedUsername = username?.toLowerCase();
     const duplicateChecks = [

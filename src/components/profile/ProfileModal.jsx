@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { compressAvatarFile } from "../../utils/imageTools";
 
 const initialProfileForm = {
   name: "",
@@ -23,7 +24,7 @@ const initialProfileForm = {
   confirmPassword: "",
 };
 
-const MAX_PROFILE_PHOTO_SIZE = 8 * 1024 * 1024;
+const MAX_PROFILE_PHOTO_SIZE = 15 * 1024 * 1024;
 
 const uccuyoLevelOptions = [
   { value: "", label: "Sin definir" },
@@ -101,14 +102,34 @@ export default function ProfileModal({ isOpen, onClose }) {
     return () => window.clearTimeout(hideMessage);
   }, [message]);
 
+  // Escape cierra la ventana y la página de atrás no se mueve mientras está abierta.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.addEventListener("keydown", closeOnEscape);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const updateField = (field, value) => {
     setFormData((current) => ({ ...current, [field]: value }));
   };
 
-  const handleAvatarChange = (event) => {
-    const file = event.target.files?.[0];
+  const handleAvatarChange = async (event) => {
+    const input = event.target;
+    const file = input.files?.[0];
+    // Se limpia para poder elegir la misma foto otra vez si hace falta.
+    input.value = "";
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -117,22 +138,23 @@ export default function ProfileModal({ isOpen, onClose }) {
     }
 
     if (file.size > MAX_PROFILE_PHOTO_SIZE) {
-      setError("La foto no puede superar 8 MB.");
+      setError("La foto no puede superar 15 MB.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
+    try {
+      const avatarUrl = await compressAvatarFile(file);
       setFormData((current) => ({
         ...current,
-        avatarUrl: reader.result,
+        avatarUrl,
         avatarZoom: 1,
         avatarOffsetX: 0,
         avatarOffsetY: 0,
       }));
       setError("");
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setError("No se pudo leer la imagen. Prueba con otra foto (JPG o PNG).");
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -164,16 +186,19 @@ export default function ProfileModal({ isOpen, onClose }) {
     try {
       const payload = { ...formData };
       delete payload.confirmPassword;
+      // La foto solo se envía si cambió: no hace falta volver a subirla en cada guardado.
+      if (payload.avatarUrl === (user?.avatarUrl || "")) delete payload.avatarUrl;
+      // Texto vacío = borrar el dato (el servidor lo interpreta así); undefined lo dejaría igual.
       await updateProfile({
         ...payload,
         age: payload.birthDate
           ? calculatedAge
           : payload.age
             ? Number(payload.age)
-            : undefined,
-        birthDate: payload.birthDate || undefined,
+            : "",
+        birthDate: payload.birthDate || "",
         sex: payload.sex,
-        householdSize: payload.householdSize ? Number(payload.householdSize) : undefined,
+        householdSize: payload.householdSize ? Number(payload.householdSize) : "",
         avatarZoom: Number(payload.avatarZoom) || 1,
         avatarOffsetX: Number(payload.avatarOffsetX) || 0,
         avatarOffsetY: Number(payload.avatarOffsetY) || 0,
@@ -218,6 +243,8 @@ export default function ProfileModal({ isOpen, onClose }) {
               <input type="file" accept="image/*" onChange={handleAvatarChange} />
             </label>
             {formData.avatarUrl && (
+              <details className="profile-photo-adjust">
+                <summary>Ajustar foto</summary>
               <div className="profile-photo-controls">
                 <label>
                   Zoom
@@ -253,6 +280,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                   />
                 </label>
               </div>
+              </details>
             )}
           </div>
 
@@ -289,7 +317,7 @@ export default function ProfileModal({ isOpen, onClose }) {
             </label>
 
             <label>
-              Gmail
+              Correo electrónico
               <input className="admin-input" type="email" value={formData.email} onChange={(event) => updateField("email", event.target.value)} required />
             </label>
 
@@ -331,7 +359,7 @@ export default function ProfileModal({ isOpen, onClose }) {
             </label>
 
             <label>
-              Pais
+              País
               <input className="admin-input" value={formData.country} onChange={(event) => updateField("country", event.target.value)} />
             </label>
 
@@ -347,7 +375,7 @@ export default function ProfileModal({ isOpen, onClose }) {
             </label>
 
             <label>
-              Ocupacion
+              Ocupación
               <input className="admin-input" value={formData.occupation} onChange={(event) => updateField("occupation", event.target.value)} />
             </label>
 
