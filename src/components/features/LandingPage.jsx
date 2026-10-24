@@ -88,10 +88,6 @@ export default function LandingPage({ onStart }) {
                 {ctaLabel}
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
-              <a href="#como-funciona" className="hero-link">
-                Ver cómo funciona
-                <span className="material-symbols-outlined">expand_more</span>
-              </a>
             </div>
             {!isAuthenticated && (
               <p className="hero-login-hint">
@@ -101,19 +97,6 @@ export default function LandingPage({ onStart }) {
           </div>
 
           <div className="impact-stage animate-pop" style={{ animationDelay: "140ms" }}>
-            <span className="float-chip chip-a">
-              <span className="material-symbols-outlined">water_drop</span>
-              Agua
-            </span>
-            <span className="float-chip chip-b">
-              <span className="material-symbols-outlined">bolt</span>
-              Energía
-            </span>
-            <span className="float-chip chip-c">
-              <span className="material-symbols-outlined">recycling</span>
-              Residuos
-            </span>
-
             <div className="impact-meter">
               <span className="impact-meter-kicker">Huella anual por persona</span>
               <h3>¿Cómo se compara tu huella?</h3>

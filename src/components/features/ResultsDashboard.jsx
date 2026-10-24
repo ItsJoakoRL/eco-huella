@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
+import { getCompletedSurveyTypes, loadQuizAnswers, loadQuizHistory } from "../../utils/quizStorage";
+import { surveyTracks } from "../../data/surveyTracks";
 import { calculateQuizResults } from "../../utils/quizResults";
 import { quizResultsAPI } from "../../services/api";
 import quizData from "../../data/quizData";
@@ -225,6 +226,9 @@ export default function ResultsDashboard({ answers, onRestart }) {
     { id: "residuos", icon: "delete_sweep", label: "Residuos", color: "#deddd8", val: results.residuos },
   ];
 
+  const completedSurveyTypes = getCompletedSurveyTypes(quizHistory);
+  const hasPendingSurveys = surveyTracks.some((track) => !completedSurveyTypes.has(track.id));
+
   const handleRestart = () => {
     if (onRestart) {
       onRestart();
@@ -399,10 +403,13 @@ export default function ResultsDashboard({ answers, onRestart }) {
             </div>
           )}
 
-          <button onClick={handleRestart} className="planet-button eco-glow-button">
-            Volver a evaluar
-            <span className="material-symbols-outlined">refresh</span>
-          </button>
+          {/* Cada encuesta se completa una sola vez: el botón solo aparece si queda alguna por hacer. */}
+          {hasPendingSurveys && (
+            <button onClick={handleRestart} className="planet-button eco-glow-button">
+              Hacer otra encuesta
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
+          )}
         </div>
       </section>
 

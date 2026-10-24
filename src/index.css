@@ -174,7 +174,7 @@ body {
 
 .hero-title {
   font-family: "Plus Jakarta Sans", sans-serif;
-  font-size: clamp(3.25rem, 6vw, 6.5rem);
+  font-size: clamp(3rem, 5vw, 5.4rem);
   line-height: 0.94;
   letter-spacing: -0.04em;
   font-weight: 900;
@@ -4528,24 +4528,24 @@ html {
   margin-bottom: 22px;
 }
 
+/* Rótulo, no botón: sin fondo ni sombra de "píldora" para que no parezca clicable. */
 .hero-pill {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 16px 6px 6px;
-  border-radius: 999px;
   color: #195847;
-  background: #ffffff;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  box-shadow: inset 0 0 0 1px rgba(41, 102, 84, 0.2), 0 10px 24px rgba(15, 43, 30, 0.08);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .hero-pill img {
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
   object-fit: cover;
+  box-shadow: 0 8px 18px rgba(15, 43, 30, 0.22);
 }
 
 .hero-actions {
@@ -4580,24 +4580,6 @@ html {
 
 .hero-cta:active {
   transform: scale(0.98);
-}
-
-.hero-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 18px 24px;
-  border-radius: 999px;
-  color: #195847;
-  background: rgba(255, 255, 255, 0.72);
-  font-weight: 800;
-  box-shadow: inset 0 0 0 1px rgba(41, 102, 84, 0.28);
-  transition: background-color 180ms ease, transform 180ms ease;
-}
-
-.hero-link:hover {
-  background: #ffffff;
-  transform: translateY(-2px);
 }
 
 .hero-copy .hero-login-hint {
@@ -4727,44 +4709,6 @@ html {
   50% {
     filter: brightness(1.14);
   }
-}
-
-.float-chip {
-  position: absolute;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  color: #195847;
-  background: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 800;
-  box-shadow: 0 16px 36px rgba(15, 43, 30, 0.15);
-  animation: eco-float 6s ease-in-out infinite;
-}
-
-.float-chip .material-symbols-outlined {
-  color: #296654;
-  font-size: 1.2rem;
-}
-
-.chip-a {
-  top: 1%;
-  left: 4%;
-}
-
-.chip-b {
-  top: 1%;
-  right: 2%;
-  animation-delay: -2s;
-}
-
-.chip-c {
-  bottom: 1%;
-  right: 10%;
-  animation-delay: -4s;
 }
 
 /* --- Portada: cifras --- */
@@ -4957,21 +4901,6 @@ html {
     padding: 28px 0 8px;
   }
 
-  .chip-a {
-    top: -2%;
-    left: 2%;
-  }
-
-  .chip-b {
-    top: -2%;
-    right: 2%;
-  }
-
-  .chip-c {
-    bottom: -4%;
-    right: 6%;
-  }
-
   .stats-strip {
     padding: 36px 18px;
   }
@@ -4984,11 +4913,6 @@ html {
 
   .hero-cta {
     width: 100%;
-  }
-
-  .hero-link {
-    width: 100%;
-    justify-content: center;
   }
 
   .stat-item span {
@@ -5064,10 +4988,6 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .meter-fill {
     width: var(--meter);
-    animation: none;
-  }
-
-  .float-chip {
     animation: none;
   }
 }
